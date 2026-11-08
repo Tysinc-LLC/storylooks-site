@@ -12,9 +12,11 @@
 <div class="narrow">
   <header class="top"><a class="wordmark" href="./">STORYLOOKS</a></header>
   <form class="panel" id="week">
-    <h1 style="font-size:34px;">What's coming up?</h1>
-    <p class="muted">Tell us about the week ahead, and next week's looks will be built around it. A few words is plenty.</p>
-    <div class="choice" style="margin:14px 0 4px;" id="ideas">
+    <h1 style="font-size:34px;" id="hello">Help shape next week's looks</h1>
+    <p class="muted">About 30 seconds. Answer whatever you like and skip the rest.</p>
+
+    <h3 style="margin:22px 0 6px;">What's coming up this week?</h3>
+    <div class="choice" style="margin:10px 0 4px;" id="ideas">
       <label><input type="checkbox" value="Work as usual"><span>Work as usual</span></label>
       <label><input type="checkbox" value="A game"><span>A game</span></label>
       <label><input type="checkbox" value="Church"><span>Church</span></label>
@@ -26,8 +28,11 @@
     </div>
     <label for="text">Anything else? <span class="muted">(optional)</span></label>
     <textarea id="text" maxlength="400" placeholder="e.g. Friend's wedding Saturday, outdoor job site Tuesday, kids' basketball on Thursday"></textarea>
+
+    <div id="questions"></div>
+
     <div id="msg" class="hidden" role="status"></div>
-    <button class="btn" id="send" type="submit" style="width:100%;margin-top:12px;">Send</button>
+    <button class="btn" id="send" type="submit" style="width:100%;margin-top:18px;">Send</button>
   </form>
 </div>
 <script src="assets/app.js"></script>
@@ -36,14 +41,59 @@
   const form = document.getElementById('week');
   const msg = document.getElementById('msg');
   const send = document.getElementById('send');
+  const box = document.getElementById('questions');
+  let questions = [];
+
+  // A few quick questions this person hasn't answered yet (some allow more than one pick).
+  postJSON('account', { t, action: 'info' }).then((r) => {
+    if (!r.ok) { showMessage(msg, r.message || 'This link is missing something. Use the link in your latest StoryLooks email.', false); return; }
+    if (r.name) document.getElementById('hello').textContent = `Help shape next week's looks, ${r.name}`;
+    questions = r.questions || [];
+    for (const q of questions) {
+      const block = document.createElement('div');
+      const h = document.createElement('h3');
+      h.style.margin = '22px 0 6px';
+      h.textContent = q.text;
+      block.appendChild(h);
+      if (q.many) {
+        const hint = document.createElement('p');
+        hint.className = 'fine';
+        hint.style.margin = '0';
+        hint.textContent = 'Pick any that fit.';
+        block.appendChild(hint);
+      }
+      const row = document.createElement('div');
+      row.className = 'choice';
+      row.style.marginTop = '10px';
+      for (const c of q.choices) {
+        const label = document.createElement('label');
+        const input = document.createElement('input');
+        input.type = q.many ? 'checkbox' : 'radio';
+        input.name = q.id;
+        input.value = c;
+        const span = document.createElement('span');
+        span.textContent = c;
+        label.append(input, span);
+        row.appendChild(label);
+      }
+      block.appendChild(row);
+      box.appendChild(block);
+    }
+  }).catch(() => {});
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const picks = [...document.querySelectorAll('#ideas input:checked')].map((i) => i.value);
     const extra = document.getElementById('text').value.trim();
     const text = [picks.join(', '), extra].filter(Boolean).join('. ');
-    if (!text) { showMessage(msg, 'Pick something or type a few words first.', false); return; }
+    const answers = {};
+    for (const q of questions) {
+      const chosen = [...document.querySelectorAll(`input[name="${q.id}"]:checked`)].map((i) => i.value);
+      if (chosen.length) answers[q.id] = chosen;
+    }
+    if (!text && !Object.keys(answers).length) { showMessage(msg, 'Pick something or type a few words first.', false); return; }
     send.disabled = true;
-    const r = await postJSON('account', { t, action: 'week', text }).catch(() => ({ ok: false }));
+    const r = await postJSON('account', { t, action: 'week', text, answers }).catch(() => ({ ok: false }));
     showMessage(msg, r.message || 'Something went wrong. Please try again.', r.ok);
     if (r.ok) send.classList.add('hidden'); else send.disabled = false;
   });
