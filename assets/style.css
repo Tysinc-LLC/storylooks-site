@@ -108,3 +108,14 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); ou
 .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
 .prose h2 { margin-top: 28px; font-size: 24px; }
 .prose p, .prose li { color: var(--ink); }
+
+/* Rating buttons on week.html: fill in where tapped, saved right away. */
+.rate-look { margin: 18px 0 26px; }
+.rate-look img { display: block; width: 100%; border-radius: 12px; background: var(--chip); }
+.rate-q { font-size: 15px; margin: 14px 0 8px; }
+.pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.pill { border: 1px solid #d9cfc2; background: #fff; color: var(--ink); border-radius: 999px; padding: 10px 18px; font: 16px/1 var(--sans); cursor: pointer; }
+.pill.round { width: 44px; height: 44px; padding: 0; }
+.pill.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.saved { font-size: 13px; color: var(--good); margin-left: 4px; visibility: hidden; }
+.saved.show { visibility: visible; }
