@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join StoryLooks</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="narrow">
+  <header class="top"><a class="wordmark" href="./">STORYLOOKS</a></header>
+
+  <div id="done" class="panel hidden">
+    <h2>Check your email</h2>
+    <p>We sent a confirmation link to <strong id="done-email"></strong>. Tap it, and your first StoryLooks will be made and sent within about 10 minutes.</p>
+    <p class="muted">Don't see it? Check your Promotions or Spam folder, and move it to your inbox so your StoryLooks always land where you'll see them.</p>
+  </div>
+
+  <form id="join" novalidate>
+    <h1 style="font-size:40px;">Join StoryLooks</h1>
+    <p class="muted">Each week, StoryLooks sends you AI-made photos of you in real outfits you can buy, set in scenes from your own life. It's free and takes about 3 minutes.</p>
+
+    <div class="panel">
+      <h2>About you</h2>
+      <label for="name">First name</label>
+      <input id="name" name="name" type="text" autocomplete="given-name" required>
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="email" required>
+      <span class="label">Which clothing should we show you?</span>
+      <div class="choice" role="radiogroup">
+        <label><input type="radio" name="clothing" value="women's" required><span>Women's</span></label>
+        <label><input type="radio" name="clothing" value="men's"><span>Men's</span></label>
+      </div>
+      <div class="row">
+        <div><label for="age">Age</label><input id="age" name="age" type="number" inputmode="numeric" min="18" max="110" required></div>
+        <div><label for="zip">Zip code</label><input id="zip" name="zip" type="text" inputmode="numeric" maxlength="10" autocomplete="postal-code" required></div>
+      </div>
+      <p class="hint" style="margin-top:6px;">Your zip gives us your local weather and seasons.</p>
+      <div class="row">
+        <div><label for="height">Height</label><input id="height" name="height" type="text" placeholder="5'6&quot;" required></div>
+        <div><label for="occupation">Occupation <span class="muted">(optional)</span></label><input id="occupation" name="occupation" type="text"></div>
+      </div>
+      <div class="row">
+        <div><label for="top">Top size</label><input id="top" name="top" type="text" placeholder="S, M, L, XL…" required></div>
+        <div><label for="pants">Pants size</label><input id="pants" name="pants" type="text" placeholder="8, or 32×30" required></div>
+      </div>
+      <div class="row">
+        <div><label for="shoe">Shoe size</label><input id="shoe" name="shoe" type="text" required></div>
+        <div><label for="dress">Dress size <span class="muted">(optional)</span></label><input id="dress" name="dress" type="text"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Your photos</h2>
+      <p class="muted">These are what the AI uses to make the photos look like you. Best results: daylight, just you in the photo, no hat or sunglasses, and your whole body in the frame for full-body shots. Phone photos are perfect.</p>
+      <span class="label">Your face, looking straight at the camera</span>
+      <label class="drop" id="face"><input type="file" accept="image/*"><span class="drop-text">Tap to add a face photo</span></label>
+      <div class="thumbs" id="face-thumbs"></div>
+      <span class="label">Full body, standing, facing the camera</span>
+      <label class="drop" id="body"><input type="file" accept="image/*"><span class="drop-text">Tap to add a full-body photo</span></label>
+      <div class="thumbs" id="body-thumbs"></div>
+      <span class="label">More photos of you <span class="muted">(optional, up to 5)</span></span>
+      <p class="hint">More photos = more accurate images. Great extras: your face from a slight angle, a big smile, another full-body shot.</p>
+      <label class="drop" id="more"><input type="file" accept="image/*" multiple><span class="drop-text">Tap to add more photos</span></label>
+      <div class="thumbs" id="more-thumbs"></div>
+    </div>
+
+    <div class="panel">
+      <h2>You</h2>
+      <label for="brands">Up to 3 favorite clothing brands or stores <span class="muted">(optional)</span></label>
+      <input id="brands" name="brands" type="text" placeholder="e.g. Carhartt, J.Crew, Target">
+      <label for="interests">Hobbies and interests</label>
+      <textarea id="interests" name="interests" placeholder="Hunting, gardening, golf, travel, cooking…" required></textarea>
+      <label for="teams">Favorite sports teams <span class="muted">(optional)</span></label>
+      <input id="teams" name="teams" type="text">
+      <span class="label">Do you have a pet you'd like in some of your photos?</span>
+      <div class="choice">
+        <label><input type="radio" name="has_pet" value="yes"><span>Yes</span></label>
+        <label><input type="radio" name="has_pet" value="no" checked><span>No</span></label>
+      </div>
+      <div id="pet" class="hidden">
+        <div class="row">
+          <div><label for="pet_name">Pet's name</label><input id="pet_name" name="pet_name" type="text" placeholder="Thor"></div>
+          <div><label for="pet_kind">What kind?</label><input id="pet_kind" name="pet_kind" type="text" placeholder="Blue heeler"></div>
+        </div>
+        <span class="label">Pet photos <span class="muted">(1–3)</span></span>
+        <label class="drop" id="petphotos"><input type="file" accept="image/*" multiple><span class="drop-text">Tap to add pet photos</span></label>
+        <div class="thumbs" id="petphotos-thumbs"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Almost done</h2>
+      <label class="check"><input type="checkbox" name="consent_age" value="yes"> I'm 18 or older.</label>
+      <label class="check"><input type="checkbox" name="consent_photos" value="yes"> I give StoryLooks permission to use my photos to make AI images of me. They're sent only to me and never posted or shared without asking me first.</label>
+      <label class="check"><input type="checkbox" name="consent_controls" value="yes"> I understand I can update my photos, pause, unsubscribe, or have all my photos and data deleted at any time.</label>
+      <p class="fine">See our <a href="privacy.html">privacy page</a> for how your photos are used and protected.</p>
+      <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+      <div id="msg" class="hidden" role="alert"></div>
+      <button class="btn" id="submit" type="submit" style="width:100%;margin-top:10px;">Send me my first StoryLooks</button>
+    </div>
+  </form>
+
+  <footer class="foot"><a href="privacy.html">Privacy</a> · <a href="mailto:hello@storylooks.com">hello@storylooks.com</a></footer>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  const startedAt = Date.now();
+  const face = photoPicker('face', { max: 1, label: 'Tap to add a face photo' });
+  const body = photoPicker('body', { max: 1, label: 'Tap to add a full-body photo' });
+  const more = photoPicker('more', { max: 5, label: 'Tap to add more photos' });
+  const pets = photoPicker('petphotos', { max: 3, label: 'Tap to add pet photos' });
+  const form = document.getElementById('join');
+  const msg = document.getElementById('msg');
+  const submit = document.getElementById('submit');
+
+  form.querySelectorAll('input[name=has_pet]').forEach((r) =>
+    r.addEventListener('change', () => document.getElementById('pet').classList.toggle('hidden', form.has_pet.value !== 'yes')));
+
+  function problem() {
+    const v = (n) => (form.elements[n]?.value || '').trim();
+    if (!v('name')) return 'Please add your first name.';
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('email'))) return 'Please check your email address.';
+    if (!form.clothing.value) return 'Please choose which clothing we should show you.';
+    if (!(Number(v('age')) >= 18)) return 'StoryLooks is for adults 18 and older.';
+    if (!/^\d{5}/.test(v('zip'))) return 'Please add your 5-digit zip code.';
+    for (const [n, label] of [['height', 'height'], ['top', 'top size'], ['pants', 'pants size'], ['shoe', 'shoe size'], ['interests', 'hobbies and interests']]) {
+      if (!v(n)) return `Please add your ${label}.`;
+    }
+    if (!face().length) return 'Please add a face photo.';
+    if (!body().length) return 'Please add a full-body photo.';
+    if (form.has_pet.value === 'yes' && (!v('pet_name') || !pets().length)) return "Please add your pet's name and at least one photo (or choose No).";
+    if (!['consent_age', 'consent_photos', 'consent_controls'].every((n) => form.elements[n].checked)) return 'Please check the three boxes above.';
+    return null;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const issue = problem();
+    if (issue) { showMessage(msg, issue, false); return; }
+    submit.disabled = true;
+    showMessage(msg, 'Getting your photos ready…', true);
+    const data = new FormData();
+    for (const n of ['name', 'email', 'clothing', 'age', 'zip', 'height', 'occupation', 'top', 'pants', 'shoe', 'dress', 'brands', 'interests', 'teams', 'has_pet', 'pet_name', 'pet_kind', 'website']) {
+      data.append(n, form.elements[n]?.value ?? '');
+    }
+    for (const n of ['consent_age', 'consent_photos', 'consent_controls']) if (form.elements[n].checked) data.append(n, 'yes');
+    data.append('started_at', String(startedAt));
+    for (const [key, list] of [['face', face()], ['body', body()], ['more', more()], ['pet_photos', form.has_pet.value === 'yes' ? pets() : []]]) {
+      for (const f of list) data.append(key, await shrink(f));
+    }
+    showMessage(msg, 'Sending…', true);
+    try {
+      const result = await postForm('signup', data);
+      if (result.ok) {
+        document.getElementById('done-email').textContent = form.email.value.trim();
+        form.classList.add('hidden');
+        document.getElementById('done').classList.remove('hidden');
+        scrollTo(0, 0);
+      } else {
+        showMessage(msg, result.message || 'Something went wrong. Please try again.', false);
+        submit.disabled = false;
+      }
+    } catch (_) {
+      showMessage(msg, "We couldn't reach StoryLooks. Check your connection and try again.", false);
+      submit.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

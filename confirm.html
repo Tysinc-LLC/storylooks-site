@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Confirm your email · StoryLooks</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="narrow">
+  <header class="top"><a class="wordmark" href="./">STORYLOOKS</a></header>
+  <div class="panel center">
+    <h1 style="font-size:36px;">One tap to go</h1>
+    <p class="muted">Confirm your email, and your first StoryLooks will be made and sent in about 10 minutes.</p>
+    <button class="btn" id="go">Confirm my email</button>
+    <div id="msg" class="hidden" role="status"></div>
+  </div>
+</div>
+<script src="assets/app.js"></script>
+<script>
+  // Confirming needs a button press (not just opening the link), so email link-checkers can't do it.
+  const btn = document.getElementById('go');
+  const msg = document.getElementById('msg');
+  const t = param('t');
+  if (!t) { btn.disabled = true; showMessage(msg, 'This link is missing something. Use the button in your confirmation email.', false); }
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    const r = await postJSON('account', { t, action: 'confirm' });
+    showMessage(msg, r.message || 'Something went wrong. Please try again.', r.ok);
+    if (r.ok) btn.classList.add('hidden'); else btn.disabled = false;
+  });
+</script>
+</body>
+</html>

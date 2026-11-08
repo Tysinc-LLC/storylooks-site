@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thanks · StoryLooks</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="narrow">
+  <header class="top"><a class="wordmark" href="./">STORYLOOKS</a></header>
+  <div class="panel center">
+    <h1 style="font-size:36px;" id="title">Thanks!</h1>
+    <p class="muted" id="text">Got it.</p>
+    <div class="actions" style="justify-content:center;" id="more"></div>
+  </div>
+</div>
+<script src="assets/app.js"></script>
+<script>
+  const m = param('m');
+  const t = param('t');
+  const title = document.getElementById('title');
+  const text = document.getElementById('text');
+  const more = document.getElementById('more');
+  if (m === 'low') {
+    title.textContent = 'Thanks, that helps';
+    text.textContent = "Sorry that one missed. A few more photos of you (daylight, just you, face and full body) usually make a big difference.";
+    if (t) more.innerHTML = `<a class="btn" href="manage.html?t=${encodeURIComponent(t)}#photos">Add photos</a>`;
+  } else if (m === 'answered') {
+    title.textContent = 'Thanks!';
+    text.textContent = "We'll use that for your next StoryLooks.";
+  } else {
+    title.textContent = 'Thanks!';
+    text.textContent = 'Your ratings help your StoryLooks get better every week. You can close this page.';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manage my StoryLooks</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="narrow">
+  <header class="top"><a class="wordmark" href="./">STORYLOOKS</a></header>
+  <div id="msg" class="hidden" role="status"></div>
+
+  <div id="page" class="hidden">
+    <h1 style="font-size:36px;">Hi, <span id="name"></span></h1>
+    <p class="muted">Your StoryLooks go to <span id="email"></span>. Status: <strong id="status"></strong>.</p>
+
+    <div class="panel" id="photos">
+      <h2>Add photos</h2>
+      <p class="muted">More good photos make your images more accurate. Best: daylight, just you, no hat or sunglasses. Your newest photos are used first.</p>
+      <div class="choice" style="margin-top:8px;">
+        <label><input type="radio" name="kind" value="person" checked><span>Photos of me</span></label>
+        <label id="petchoice" class="hidden"><input type="radio" name="kind" value="pet"><span>Photos of my pet</span></label>
+      </div>
+      <label class="drop" id="add" style="margin-top:12px;"><input type="file" accept="image/*" multiple><span class="drop-text">Tap to choose photos</span></label>
+      <div class="thumbs" id="add-thumbs"></div>
+      <div class="actions"><button class="btn" id="upload">Add these photos</button></div>
+    </div>
+
+    <div class="panel">
+      <h2>Pause or stop</h2>
+      <p class="muted">Pause to take a break (your photos stay saved), or unsubscribe to stop the emails.</p>
+      <div class="actions">
+        <button class="btn ghost" data-action="pause" id="pause">Pause</button>
+        <button class="btn ghost hidden" data-action="resume" id="resume">Resume my StoryLooks</button>
+        <button class="btn ghost" data-action="unsubscribe" id="unsub">Unsubscribe</button>
+      </div>
+    </div>
+
+    <div class="panel" id="delete">
+      <h2>Delete everything</h2>
+      <p class="muted">Permanently deletes your photos, every image we made, and your account. This can't be undone.</p>
+      <div class="actions"><button class="btn danger" data-action="delete">Delete my photos and data</button></div>
+    </div>
+  </div>
+  <footer class="foot"><a href="privacy.html">Privacy</a> · <a href="mailto:hello@storylooks.com">hello@storylooks.com</a></footer>
+</div>
+<script src="assets/app.js"></script>
+<script>
+  const t = param('t');
+  const msg = document.getElementById('msg');
+  const page = document.getElementById('page');
+  const add = photoPicker('add', { max: 6, label: 'Tap to choose photos' });
+  const labels = { active: 'active', paused: 'paused', unsubscribed: 'unsubscribed', pending: 'waiting for you to confirm your email' };
+
+  function showStatus(status) {
+    document.getElementById('status').textContent = labels[status] || status;
+    const stopped = status === 'paused' || status === 'unsubscribed';
+    document.getElementById('pause').classList.toggle('hidden', stopped);
+    document.getElementById('unsub').classList.toggle('hidden', status === 'unsubscribed');
+    document.getElementById('resume').classList.toggle('hidden', !stopped);
+  }
+
+  async function load() {
+    if (!t) { showMessage(msg, 'This link is missing something. Use the link at the bottom of any StoryLooks email.', false); return; }
+    const r = await postJSON('account', { t, action: 'info' });
+    if (!r.ok) { showMessage(msg, r.message, false); return; }
+    document.getElementById('name').textContent = r.name;
+    document.getElementById('email').textContent = r.email;
+    if (r.pet) document.getElementById('petchoice').classList.remove('hidden');
+    showStatus(r.status);
+    page.classList.remove('hidden');
+    if (location.hash) document.querySelector(location.hash)?.scrollIntoView();
+  }
+
+  document.querySelectorAll('[data-action]').forEach((btn) => btn.addEventListener('click', async () => {
+    const action = btn.dataset.action;
+    if (action === 'delete' && !confirm('Delete your photos, images and account for good? This can\'t be undone.')) return;
+    btn.disabled = true;
+    const r = await postJSON('account', { t, action });
+    btn.disabled = false;
+    showMessage(msg, r.message || 'Something went wrong.', r.ok);
+    scrollTo(0, 0);
+    if (r.ok && action === 'delete') page.classList.add('hidden');
+    else if (r.ok && r.status) showStatus(r.status);
+  }));
+
+  document.getElementById('upload').addEventListener('click', async () => {
+    const files = add();
+    if (!files.length) { showMessage(msg, 'Choose at least one photo first.', false); scrollTo(0, 0); return; }
+    const btn = document.getElementById('upload');
+    btn.disabled = true;
+    showMessage(msg, 'Uploading…', true);
+    const data = new FormData();
+    data.append('t', t);
+    data.append('action', 'photos');
+    data.append('kind', document.querySelector('input[name=kind]:checked').value);
+    for (const f of files) data.append('photos', await shrink(f));
+    const r = await postForm('account', data);
+    btn.disabled = false;
+    showMessage(msg, r.message || 'Something went wrong.', r.ok);
+    scrollTo(0, 0);
+  });
+
+  load();
+</script>
+</body>
+</html>
