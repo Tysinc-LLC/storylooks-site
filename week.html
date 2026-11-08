@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your week ahead · StoryLooks</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="narrow">
+  <header class="top"><a class="wordmark" href="./">STORYLOOKS</a></header>
+  <form class="panel" id="week">
+    <h1 style="font-size:34px;">What's coming up?</h1>
+    <p class="muted">Tell us about the week ahead, and next week's looks will be built around it. A few words is plenty.</p>
+    <div class="choice" style="margin:14px 0 4px;" id="ideas">
+      <label><input type="checkbox" value="Work as usual"><span>Work as usual</span></label>
+      <label><input type="checkbox" value="A game"><span>A game</span></label>
+      <label><input type="checkbox" value="Church"><span>Church</span></label>
+      <label><input type="checkbox" value="Date night"><span>Date night</span></label>
+      <label><input type="checkbox" value="A party"><span>A party</span></label>
+      <label><input type="checkbox" value="Travel"><span>Travel</span></label>
+      <label><input type="checkbox" value="Outdoors"><span>Outdoors</span></label>
+      <label><input type="checkbox" value="Family time"><span>Family time</span></label>
+    </div>
+    <label for="text">Anything else? <span class="muted">(optional)</span></label>
+    <textarea id="text" maxlength="400" placeholder="e.g. Friend's wedding Saturday, outdoor job site Tuesday, kids' basketball on Thursday"></textarea>
+    <div id="msg" class="hidden" role="status"></div>
+    <button class="btn" id="send" type="submit" style="width:100%;margin-top:12px;">Send</button>
+  </form>
+</div>
+<script src="assets/app.js"></script>
+<script>
+  const t = param('t');
+  const form = document.getElementById('week');
+  const msg = document.getElementById('msg');
+  const send = document.getElementById('send');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const picks = [...document.querySelectorAll('#ideas input:checked')].map((i) => i.value);
+    const extra = document.getElementById('text').value.trim();
+    const text = [picks.join(', '), extra].filter(Boolean).join('. ');
+    if (!text) { showMessage(msg, 'Pick something or type a few words first.', false); return; }
+    send.disabled = true;
+    const r = await postJSON('account', { t, action: 'week', text }).catch(() => ({ ok: false }));
+    showMessage(msg, r.message || 'Something went wrong. Please try again.', r.ok);
+    if (r.ok) send.classList.add('hidden'); else send.disabled = false;
+  });
+</script>
+</body>
+</html>
