@@ -128,3 +128,12 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); ou
 .step-buttons { display: flex; gap: 10px; margin-top: 4px; }
 .step-buttons .btn { flex: 1; }
 .step-buttons .btn.ghost { flex: 0 0 auto; }
+
+/* Photo do's and don'ts on the sign-up page */
+.photo-rules { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0 4px; }
+@media (max-width: 420px) { .photo-rules { grid-template-columns: 1fr; } }
+.photo-rules > div { border-radius: 12px; padding: 12px 14px; font-size: 15px; }
+.photo-rules ul { margin: 6px 0 0; padding-left: 18px; }
+.photo-rules li { margin: 2px 0; }
+.photo-rules .yes { background: var(--good-bg); color: var(--good); }
+.photo-rules .no { background: var(--bad-bg); color: var(--bad); }
