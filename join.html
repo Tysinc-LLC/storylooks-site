@@ -67,6 +67,7 @@
         <select id="pants" name="pants" aria-labelledby="pants-label"></select>
         <select id="inseam" name="inseam" aria-label="Inseam"></select>
       </div>
+      <p class="hint" style="margin-top:6px;">Not sure of your length? Leave it, and we'll match on size.</p>
       <div id="dress-box">
         <label for="dress">Dress size <span class="muted">(optional)</span></label>
         <select id="dress" name="dress"></select>
@@ -93,8 +94,27 @@
       <p class="muted">This is what makes the scenes feel like your week.</p>
       <label for="occupation">What do you do for work? <span class="muted">(optional)</span></label>
       <input id="occupation" name="occupation" type="text" placeholder="e.g. Farmer, nurse, teacher">
-      <label for="interests">Hobbies and interests</label>
-      <textarea id="interests" name="interests" placeholder="Hunting, gardening, golf, travel, cooking…" required></textarea>
+      <span class="label">Hobbies and interests <span class="muted">(tap any that fit)</span></span>
+      <div class="choice" id="hobbies">
+        <label><input type="checkbox" value="Hunting"><span>Hunting</span></label>
+        <label><input type="checkbox" value="Fishing"><span>Fishing</span></label>
+        <label><input type="checkbox" value="Camping"><span>Camping</span></label>
+        <label><input type="checkbox" value="Hiking"><span>Hiking</span></label>
+        <label><input type="checkbox" value="Golf"><span>Golf</span></label>
+        <label><input type="checkbox" value="Gardening"><span>Gardening</span></label>
+        <label><input type="checkbox" value="Cooking"><span>Cooking</span></label>
+        <label><input type="checkbox" value="Travel"><span>Travel</span></label>
+        <label><input type="checkbox" value="Sports"><span>Sports</span></label>
+        <label><input type="checkbox" value="Working out"><span>Working out</span></label>
+        <label><input type="checkbox" value="Music"><span>Music</span></label>
+        <label><input type="checkbox" value="Reading"><span>Reading</span></label>
+        <label><input type="checkbox" value="DIY projects"><span>DIY projects</span></label>
+        <label><input type="checkbox" value="Horses"><span>Horses</span></label>
+        <label><input type="checkbox" value="Boating"><span>Boating</span></label>
+        <label><input type="checkbox" value="Church"><span>Church</span></label>
+      </div>
+      <label for="interests_more">Anything else? <span class="muted">(optional)</span></label>
+      <input id="interests_more" name="interests_more" type="text" placeholder="e.g. Iowa State football, antiques, coaching softball">
       <label for="brands">Up to 3 favorite clothing brands or stores <span class="muted">(optional)</span></label>
       <input id="brands" name="brands" type="text" placeholder="e.g. Carhartt, J.Crew, Target">
       <label for="teams">Favorite sports teams <span class="muted">(optional)</span></label>
@@ -154,6 +174,10 @@
   let step = 1;
   const v = (n) => (form.elements[n]?.value || '').trim();
 
+  // Hobbies = the tapped choices plus anything typed.
+  const interests = () => [...document.querySelectorAll('#hobbies input:checked')].map((i) => i.value)
+    .concat(v('interests_more') ? [v('interests_more')] : []).join(', ');
+
   function problem(n) {
     if (n === 1) {
       if (!v('name')) return 'Please add your first name.';
@@ -165,14 +189,14 @@
     }
     if (n === 2) {
       if (!v('height_ft') || !v('height_in')) return 'Please choose your height in feet and inches.';
-      for (const [k, label] of [['top', 'top size'], ['shoe', 'shoe size'], ['pants', 'pants size'], ['inseam', 'pants length']]) if (!v(k)) return `Please choose your ${label}.`;
+      for (const [k, label] of [['top', 'top size'], ['shoe', 'shoe size'], ['pants', 'pants size']]) if (!v(k)) return `Please choose your ${label}.`;
     }
     if (n === 3) {
       if (!face().length) return 'Please add a face photo.';
       if (!body().length) return 'Please add a full-body photo.';
     }
     if (n === 4) {
-      if (!v('interests')) return 'Please add a few hobbies or interests.';
+      if (!interests()) return 'Please tap at least one hobby or type one in.';
       if (form.has_pet.value === 'yes' && (!v('pet_name') || !pets().length)) return "Please add your pet's name and at least one photo (or choose No).";
       if (!['consent_age', 'consent_photos', 'consent_controls'].every((k) => form.elements[k].checked)) return 'Please check the three boxes above.';
     }
@@ -192,9 +216,9 @@
     fill('top', 'Choose', ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'], true);
     fill('shoe', 'Choose', women ? range(5, 12, 0.5) : range(6, 15, 0.5), true);
     fill('pants', women ? 'Size' : 'Waist', women ? ['00', '0', ...range(2, 24, 2)] : range(28, 44), true);
-    fill('inseam', 'Length', women ? ['Short', 'Regular', 'Long'] : range(28, 36, 2), true);
+    fill('inseam', 'Length: not sure', women ? ['Short', 'Regular', 'Long'] : range(28, 36, 2), true);
     fill('dress', 'Choose', ['00', '0', ...range(2, 24, 2)], true);
-    document.getElementById('pants-label').textContent = women ? 'Pants size and length' : 'Pants waist and length';
+    document.getElementById('pants-label').textContent = women ? 'Pants size and length (optional)' : 'Pants waist and length (optional)';
     document.getElementById('dress-box').classList.toggle('hidden', !women);
     if (!women) form.dress.value = '';
   }
@@ -230,9 +254,10 @@
     submit.disabled = true;
     showMessage(msg, 'Getting your photos ready…', true);
     const data = new FormData();
-    for (const n of ['name', 'last_name', 'email', 'clothing', 'age', 'zip', 'height_ft', 'height_in', 'occupation', 'top', 'pants', 'inseam', 'shoe', 'dress', 'brands', 'interests', 'teams', 'has_pet', 'pet_name', 'pet_kind', 'website']) {
+    for (const n of ['name', 'last_name', 'email', 'clothing', 'age', 'zip', 'height_ft', 'height_in', 'occupation', 'top', 'pants', 'inseam', 'shoe', 'dress', 'brands', 'teams', 'has_pet', 'pet_name', 'pet_kind', 'website']) {
       data.append(n, form.elements[n]?.value ?? '');
     }
+    data.append('interests', interests());
     for (const n of ['consent_age', 'consent_photos', 'consent_controls']) if (form.elements[n].checked) data.append(n, 'yes');
     data.append('started_at', String(startedAt));
     for (const [key, list] of [['face', face()], ['body', body()], ['more', more()], ['pet_photos', form.has_pet.value === 'yes' ? pets() : []]]) {
