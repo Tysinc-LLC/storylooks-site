@@ -119,3 +119,12 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); ou
 .pill.on { background: var(--ink); color: #fff; border-color: var(--ink); }
 .saved { font-size: 13px; color: var(--good); margin-left: 4px; visibility: hidden; }
 .saved.show { visibility: visible; }
+
+/* Sign-up steps */
+.steps-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 18px; }
+.steps-bar span { height: 5px; border-radius: 3px; background: var(--line); }
+.steps-bar span.on { background: var(--ink); }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.step-buttons { display: flex; gap: 10px; margin-top: 4px; }
+.step-buttons .btn { flex: 1; }
+.step-buttons .btn.ghost { flex: 0 0 auto; }

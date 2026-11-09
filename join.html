@@ -18,19 +18,24 @@
     <ul class="muted" style="padding-left:20px;margin:8px 0 0;">
       <li><strong>Today:</strong> your welcome StoryLooks, with two looks to start.</li>
       <li><strong>Every Saturday morning:</strong> a new StoryLooks for the week ahead, built around your weather, the season and your plans.</li>
-      <li><strong>Each email</strong> has one quick question and a spot to tell us what's coming up, so the next week's looks fit your life even better.</li>
+      <li><strong>Each email</strong> has a button to rate your looks and tell us what's coming up, so the next week's looks fit your life even better.</li>
     </ul>
     <p class="muted" style="margin-top:16px;">Don't see the email? Check your Promotions or Spam folder, and move it to your inbox so your StoryLooks always land where you'll see them.</p>
   </div>
 
   <form id="join" novalidate>
     <h1 style="font-size:40px;">Join StoryLooks</h1>
-    <p class="muted">Each week, StoryLooks sends you AI-made photos of you in real outfits you can purchase, set in scenes from your own life. It's free and takes about 3 minutes.</p>
+    <p class="muted">Each week, StoryLooks sends you AI-made photos of you in real outfits you can purchase, set in scenes from your own life. It's free: 4 quick steps, about 3 minutes.</p>
 
-    <div class="panel">
+    <div class="steps-bar" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    <p class="fine" id="step-label" style="margin:6px 0 0;">Step 1 of 4</p>
+
+    <div class="panel step" data-step="1">
       <h2>About you</h2>
-      <label for="name">First name</label>
-      <input id="name" name="name" type="text" autocomplete="given-name" required>
+      <div class="row">
+        <div><label for="name">First name</label><input id="name" name="name" type="text" autocomplete="given-name" required></div>
+        <div><label for="last_name">Last name</label><input id="last_name" name="last_name" type="text" autocomplete="family-name" required></div>
+      </div>
       <label for="email">Email</label>
       <input id="email" name="email" type="email" autocomplete="email" required>
       <span class="label">Which clothing should we show you?</span>
@@ -43,21 +48,27 @@
         <div><label for="zip">Zip code</label><input id="zip" name="zip" type="text" inputmode="numeric" maxlength="10" autocomplete="postal-code" required></div>
       </div>
       <p class="hint" style="margin-top:6px;">Your zip gives us your local weather and seasons.</p>
-      <div class="row">
-        <div><label for="height">Height</label><input id="height" name="height" type="text" placeholder="5'6&quot;" required></div>
-        <div><label for="occupation">Occupation <span class="muted">(optional)</span></label><input id="occupation" name="occupation" type="text"></div>
+    </div>
+
+    <div class="panel step hidden" data-step="2">
+      <h2>Your fit</h2>
+      <p class="muted">So the clothes we pick come in your size, and the photos get your build right.</p>
+      <span class="label">Height</span>
+      <div class="pair">
+        <select id="height_ft" name="height_ft" aria-label="Feet"><option value="">Feet</option><option value="4">4 ft</option><option value="5">5 ft</option><option value="6">6 ft</option><option value="7">7 ft</option></select>
+        <select id="height_in" name="height_in" aria-label="Inches"><option value="">Inches</option><option value="0">0 in</option><option value="1">1 in</option><option value="2">2 in</option><option value="3">3 in</option><option value="4">4 in</option><option value="5">5 in</option><option value="6">6 in</option><option value="7">7 in</option><option value="8">8 in</option><option value="9">9 in</option><option value="10">10 in</option><option value="11">11 in</option></select>
       </div>
       <div class="row">
         <div><label for="top">Top size</label><input id="top" name="top" type="text" placeholder="S, M, L, XL…" required></div>
         <div><label for="pants">Pants size</label><input id="pants" name="pants" type="text" placeholder="8, or 32×30" required></div>
       </div>
       <div class="row">
-        <div><label for="shoe">Shoe size</label><input id="shoe" name="shoe" type="text" required></div>
+        <div><label for="shoe">Shoe size</label><input id="shoe" name="shoe" type="text" inputmode="decimal" required></div>
         <div><label for="dress">Dress size <span class="muted">(optional)</span></label><input id="dress" name="dress" type="text"></div>
       </div>
     </div>
 
-    <div class="panel">
+    <div class="panel step hidden" data-step="3">
       <h2>Your photos</h2>
       <p class="muted">These are what the AI uses to make the photos look like you. Best results: daylight, just you in the photo, no hat or sunglasses, and your whole body in the frame for full-body shots. Phone photos are perfect.</p>
       <span class="label">Your face, looking straight at the camera</span>
@@ -72,12 +83,15 @@
       <div class="thumbs" id="more-thumbs"></div>
     </div>
 
-    <div class="panel">
-      <h2>You</h2>
-      <label for="brands">Up to 3 favorite clothing brands or stores <span class="muted">(optional)</span></label>
-      <input id="brands" name="brands" type="text" placeholder="e.g. Carhartt, J.Crew, Target">
+    <div class="panel step hidden" data-step="4">
+      <h2>Your life</h2>
+      <p class="muted">This is what makes the scenes feel like your week.</p>
+      <label for="occupation">What do you do for work? <span class="muted">(optional)</span></label>
+      <input id="occupation" name="occupation" type="text" placeholder="e.g. Farmer, nurse, teacher">
       <label for="interests">Hobbies and interests</label>
       <textarea id="interests" name="interests" placeholder="Hunting, gardening, golf, travel, cooking…" required></textarea>
+      <label for="brands">Up to 3 favorite clothing brands or stores <span class="muted">(optional)</span></label>
+      <input id="brands" name="brands" type="text" placeholder="e.g. Carhartt, J.Crew, Target">
       <label for="teams">Favorite sports teams <span class="muted">(optional)</span></label>
       <input id="teams" name="teams" type="text">
       <span class="label">Do you have a pet you'd like in some of your photos?</span>
@@ -94,17 +108,20 @@
         <label class="drop" id="petphotos"><input type="file" accept="image/*" multiple><span class="drop-text">Tap to add pet photos</span></label>
         <div class="thumbs" id="petphotos-thumbs"></div>
       </div>
-    </div>
 
-    <div class="panel">
-      <h2>Almost done</h2>
+      <h3 style="margin-top:28px;">Almost done</h3>
       <label class="check"><input type="checkbox" name="consent_age" value="yes"> I'm 18 or older.</label>
       <label class="check"><input type="checkbox" name="consent_photos" value="yes"> I give StoryLooks permission to use my photos to make AI images of me. They're sent only to me and never posted or shared without asking me first.</label>
       <label class="check"><input type="checkbox" name="consent_controls" value="yes"> I understand I can update my photos, pause, unsubscribe, or have all my photos and data deleted at any time.</label>
       <p class="fine">See our <a href="privacy.html">privacy page</a> for how your photos are used and protected.</p>
       <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
-      <div id="msg" class="hidden" role="alert"></div>
-      <button class="btn" id="submit" type="submit" style="width:100%;margin-top:10px;">Send me my first StoryLooks</button>
+    </div>
+
+    <div id="msg" class="hidden" role="alert"></div>
+    <div class="step-buttons">
+      <button class="btn ghost hidden" id="back" type="button">Back</button>
+      <button class="btn" id="next" type="button">Next</button>
+      <button class="btn hidden" id="submit" type="submit">Send me my first StoryLooks</button>
     </div>
   </form>
 
@@ -125,31 +142,69 @@
   form.querySelectorAll('input[name=has_pet]').forEach((r) =>
     r.addEventListener('change', () => document.getElementById('pet').classList.toggle('hidden', form.has_pet.value !== 'yes')));
 
-  function problem() {
-    const v = (n) => (form.elements[n]?.value || '').trim();
-    if (!v('name')) return 'Please add your first name.';
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('email'))) return 'Please check your email address.';
-    if (!form.clothing.value) return 'Please choose which clothing we should show you.';
-    if (!(Number(v('age')) >= 18)) return 'StoryLooks is for adults 18 and older.';
-    if (!/^\d{5}/.test(v('zip'))) return 'Please add your 5-digit zip code.';
-    for (const [n, label] of [['height', 'height'], ['top', 'top size'], ['pants', 'pants size'], ['shoe', 'shoe size'], ['interests', 'hobbies and interests']]) {
-      if (!v(n)) return `Please add your ${label}.`;
+  // The form is 4 short steps. Each step is checked before moving on; everything is sent at the end.
+  const steps = [...form.querySelectorAll('.step')];
+  const back = document.getElementById('back');
+  const next = document.getElementById('next');
+  let step = 1;
+  const v = (n) => (form.elements[n]?.value || '').trim();
+
+  function problem(n) {
+    if (n === 1) {
+      if (!v('name')) return 'Please add your first name.';
+      if (!v('last_name')) return 'Please add your last name.';
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('email'))) return 'Please check your email address.';
+      if (!form.clothing.value) return 'Please choose which clothing we should show you.';
+      if (!(Number(v('age')) >= 18)) return 'StoryLooks is for adults 18 and older.';
+      if (!/^\d{5}/.test(v('zip'))) return 'Please add your 5-digit zip code.';
     }
-    if (!face().length) return 'Please add a face photo.';
-    if (!body().length) return 'Please add a full-body photo.';
-    if (form.has_pet.value === 'yes' && (!v('pet_name') || !pets().length)) return "Please add your pet's name and at least one photo (or choose No).";
-    if (!['consent_age', 'consent_photos', 'consent_controls'].every((n) => form.elements[n].checked)) return 'Please check the three boxes above.';
+    if (n === 2) {
+      if (!v('height_ft') || !v('height_in')) return 'Please choose your height in feet and inches.';
+      for (const [k, label] of [['top', 'top size'], ['pants', 'pants size'], ['shoe', 'shoe size']]) if (!v(k)) return `Please add your ${label}.`;
+    }
+    if (n === 3) {
+      if (!face().length) return 'Please add a face photo.';
+      if (!body().length) return 'Please add a full-body photo.';
+    }
+    if (n === 4) {
+      if (!v('interests')) return 'Please add a few hobbies or interests.';
+      if (form.has_pet.value === 'yes' && (!v('pet_name') || !pets().length)) return "Please add your pet's name and at least one photo (or choose No).";
+      if (!['consent_age', 'consent_photos', 'consent_controls'].every((k) => form.elements[k].checked)) return 'Please check the three boxes above.';
+    }
     return null;
   }
 
+  function show(n) {
+    step = n;
+    steps.forEach((el) => el.classList.toggle('hidden', Number(el.dataset.step) !== n));
+    document.querySelectorAll('.steps-bar span').forEach((el, i) => el.classList.toggle('on', i < n));
+    document.getElementById('step-label').textContent = `Step ${n} of ${steps.length}`;
+    back.classList.toggle('hidden', n === 1);
+    next.classList.toggle('hidden', n === steps.length);
+    submit.classList.toggle('hidden', n !== steps.length);
+    msg.className = 'hidden';
+    form.scrollIntoView({ block: 'start' });
+  }
+
+  next.addEventListener('click', () => {
+    const issue = problem(step);
+    if (issue) { showMessage(msg, issue, false); return; }
+    show(step + 1);
+  });
+  back.addEventListener('click', () => show(step - 1));
+  show(1);
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const issue = problem();
-    if (issue) { showMessage(msg, issue, false); return; }
+    if (step !== steps.length) { next.click(); return; } // Enter/Go key on an earlier step = Next
+    for (let n = 1; n <= steps.length; n++) {
+      const issue = problem(n);
+      if (issue) { show(n); showMessage(msg, issue, false); return; }
+    }
     submit.disabled = true;
     showMessage(msg, 'Getting your photos ready…', true);
     const data = new FormData();
-    for (const n of ['name', 'email', 'clothing', 'age', 'zip', 'height', 'occupation', 'top', 'pants', 'shoe', 'dress', 'brands', 'interests', 'teams', 'has_pet', 'pet_name', 'pet_kind', 'website']) {
+    for (const n of ['name', 'last_name', 'email', 'clothing', 'age', 'zip', 'height_ft', 'height_in', 'occupation', 'top', 'pants', 'shoe', 'dress', 'brands', 'interests', 'teams', 'has_pet', 'pet_name', 'pet_kind', 'website']) {
       data.append(n, form.elements[n]?.value ?? '');
     }
     for (const n of ['consent_age', 'consent_photos', 'consent_controls']) if (form.elements[n].checked) data.append(n, 'yes');
