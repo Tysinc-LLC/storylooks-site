@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test results · StoryLooks</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .stat .n { font-family: var(--serif); font-size: 30px; line-height: 1.1; }
+  .stat .l { font-size: 13px; color: var(--soft); margin-top: 4px; }
+  .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table.t { border-collapse: collapse; width: 100%; font-size: 14px; white-space: nowrap; }
+  table.t th { text-align: left; font-weight: 600; color: var(--soft); font-size: 12px; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  table.t td { padding: 9px 10px; border-bottom: 1px solid var(--line); }
+  table.t td.num, table.t th.num { text-align: right; }
+  .wide { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+</style>
+</head>
+<body>
+<div class="wide">
+  <header class="top"><a class="wordmark" href="./">STORYLOOKS</a><span class="fine" id="asof"></span></header>
+  <h1 style="font-size:34px;">Test results</h1>
+  <p class="muted" style="margin-top:6px;">Private: only people with your link can see this. Test emails you asked for aren't counted.</p>
+  <div id="msg" class="hidden" role="status"></div>
+  <div id="out" class="hidden">
+    <div class="cards" id="cards"></div>
+    <div class="panel"><h2>By person</h2><div class="scroll"><table class="t" id="people"></table></div></div>
+    <div class="panel"><h2>By week</h2><div class="scroll"><table class="t" id="weeks"></table></div></div>
+    <div class="panel"><h2>Most-clicked products</h2><div class="scroll"><table class="t" id="top"></table></div></div>
+    <div class="panel">
+      <h2>What these mean</h2>
+      <ul class="muted" style="padding-left:20px;margin:8px 0 0;">
+        <li><strong>Looks like me:</strong> average of the 1–5 ratings people tap. 4 or higher is the goal.</li>
+        <li><strong>Rated:</strong> share of sent looks that got a rating, a sign people are opening and engaging.</li>
+        <li><strong>Would wear:</strong> share of "Would you wear it?" answers that were Yes.</li>
+        <li><strong>Shop clicks:</strong> taps on Shop buttons in the emails. Clicks from work email systems that scan every link are left out.</li>
+        <li><strong>Cost:</strong> what Google charged to plan, make and check the images.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<script src="assets/app.js"></script>
+<script>
+  // The private key comes from the link (#k=…) once, then is remembered on this device.
+  let key = new URLSearchParams(location.hash.slice(1)).get('k');
+  try { if (key) localStorage.setItem('sl_admin', key); else key = localStorage.getItem('sl_admin'); } catch (_) {}
+  if (location.hash) history.replaceState(null, '', location.pathname);
+  const msg = document.getElementById('msg');
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const dash = (v, suffix = '') => (v === null || v === undefined ? '–' : `${v}${suffix}`);
+  const day = (iso) => (iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '–');
+  const usd = (x) => `$${Number(x || 0).toFixed(2)}`;
+  function table(id, cols, rows) {
+    const head = `<tr>${cols.map((c) => `<th class="${c.num ? 'num' : ''}">${c.label}</th>`).join('')}</tr>`;
+    const body = rows.length ? rows.map((r) => `<tr>${cols.map((c) => `<td class="${c.num ? 'num' : ''}">${c.get(r)}</td>`).join('')}</tr>`).join('')
+      : `<tr><td colspan="${cols.length}" class="muted">Nothing yet.</td></tr>`;
+    document.getElementById(id).innerHTML = head + body;
+  }
+  const common = [
+    { label: 'Emails', num: true, get: (r) => r.emails },
+    { label: 'Looks', num: true, get: (r) => r.looks },
+    { label: 'Rated', num: true, get: (r) => dash(r.looks_rated_pct, '%') },
+    { label: 'Looks like me', num: true, get: (r) => dash(r.looks_like_me) },
+    { label: 'Would wear', num: true, get: (r) => dash(r.would_wear_yes_pct, '%') },
+    { label: 'Shop clicks', num: true, get: (r) => r.shop_clicks },
+    { label: 'Cost', num: true, get: (r) => usd(r.cost) },
+  ];
+
+  async function load() {
+    if (!key) { showMessage(msg, 'Open this page with your private results link.', false); return; }
+    const r = await postJSON('results', { key }).catch(() => ({ ok: false }));
+    if (!r.ok) { showMessage(msg, r.message === 'Not allowed.' ? 'That results link is not valid.' : 'Could not load results. Try again.', false); return; }
+    const T = r.totals;
+    document.getElementById('asof').textContent = `Updated ${new Date(r.as_of).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`;
+    const card = (n, l) => `<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
+    document.getElementById('cards').innerHTML = [
+      card(T.active, `active testers${T.waiting_to_confirm ? ` · ${T.waiting_to_confirm} not confirmed` : ''}`),
+      card(T.emails, 'emails sent'),
+      card(dash(T.looks_like_me), 'looks like me (1–5)'),
+      card(dash(T.looks_rated_pct, '%'), 'of looks rated'),
+      card(dash(T.would_wear_yes_pct, '%'), 'would wear (Yes)'),
+      card(T.shop_clicks, `shop clicks · ${T.people_who_clicked} ${T.people_who_clicked === 1 ? 'person' : 'people'}`),
+      card(usd(T.cost), 'total cost'),
+      card(T.emails ? usd(T.cost / T.emails) : '–', 'cost per email'),
+    ].join('');
+    table('people', [
+      { label: 'Name', get: (p) => esc(p.name) },
+      { label: 'Status', get: (p) => esc(p.status) },
+      { label: 'Joined', get: (p) => day(p.joined) },
+      ...common,
+      { label: 'Last active', get: (p) => day(p.last_activity) },
+    ], r.testers);
+    table('weeks', [{ label: 'Week of', get: (w) => day(w.week + 'T12:00:00Z') }, ...common], r.weeks);
+    table('top', [
+      { label: 'Brand', get: (x) => esc(x.brand) },
+      { label: 'Product', get: (x) => esc(x.product) },
+      { label: 'Clicks', num: true, get: (x) => x.clicks },
+    ], r.top_products);
+    document.getElementById('out').classList.remove('hidden');
+  }
+  load();
+</script>
+</body>
+</html>
