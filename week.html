@@ -14,6 +14,7 @@
   <form class="panel" id="week">
     <h1 style="font-size:34px;" id="hello">How did we do?</h1>
     <p class="muted">About 30 seconds. Answer whatever you like and skip the rest.</p>
+    <p class="looks-links"><a id="past-link" href="#">Past looks</a> · <a id="fav-link" href="#">My favorites</a></p>
 
     <div id="looks"></div>
 
@@ -40,6 +41,8 @@
 <script src="assets/app.js"></script>
 <script>
   const t = param('t');
+  document.getElementById('past-link').href = `looks.html?t=${encodeURIComponent(t || '')}#past`;
+  document.getElementById('fav-link').href = `looks.html?t=${encodeURIComponent(t || '')}#favorites`;
   const form = document.getElementById('week');
   const msg = document.getElementById('msg');
   const send = document.getElementById('send');
@@ -47,43 +50,8 @@
   const looksBox = document.getElementById('looks');
   let questions = [];
 
-  const el = (tag, cls, text) => { const x = document.createElement(tag); if (cls) x.className = cls; if (text) x.textContent = text; return x; };
-
-  // One row of rating buttons. A tap fills the button in and saves right away; no page change.
-  function ratingRow(look, q, choices, current, round) {
-    const row = el('div', 'pills');
-    const saved = el('span', 'saved', 'Saved');
-    for (const c of choices) {
-      const b = el('button', `pill${round ? ' round' : ''}${current === c ? ' on' : ''}`, c);
-      b.type = 'button';
-      b.addEventListener('click', async () => {
-        row.querySelectorAll('.pill').forEach((x) => x.classList.toggle('on', x === b));
-        saved.classList.remove('show');
-        const r = await postJSON('account', { t, action: 'rate', look: look.id, q, a: c }).catch(() => ({ ok: false }));
-        saved.textContent = r.ok ? 'Saved' : 'Not saved, tap again';
-        saved.classList.add('show');
-        if (q === 'looks_like_me') look.tip.classList.toggle('hidden', !(r.ok && Number(c) <= 2));
-      });
-      row.appendChild(b);
-    }
-    row.appendChild(saved);
-    return row;
-  }
-
   function showLooks(looks) {
-    for (const look of looks) {
-      const card = el('div', 'rate-look');
-      card.appendChild(el('h3', '', look.title));
-      if (look.image) { const img = el('img'); img.src = look.image; img.alt = look.title; img.loading = 'lazy'; card.appendChild(img); }
-      card.appendChild(el('div', 'rate-q', 'Does this look like you? (1 = not at all, 5 = that\'s me)'));
-      look.tip = el('p', 'fine hidden');
-      look.tip.innerHTML = `Sorry that one missed. A few more photos of you usually help a lot. <a href="manage.html?t=${encodeURIComponent(t)}#photos">Add photos</a>`;
-      card.appendChild(ratingRow(look, 'looks_like_me', ['1', '2', '3', '4', '5'], look.looks_like_me, true));
-      card.appendChild(look.tip);
-      card.appendChild(el('div', 'rate-q', 'Would you wear it?'));
-      card.appendChild(ratingRow(look, 'would_wear', ['Yes', 'Maybe', 'No'], look.would_wear, false));
-      looksBox.appendChild(card);
-    }
+    looks.forEach((look, i) => looksBox.appendChild(lookCard(t, look, { label: `Look ${i + 1} of ${looks.length}` })));
     if (looks.length) {
       const h = el('h2', '', "Help shape next week's looks");
       h.style.margin = '30px 0 0';

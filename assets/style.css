@@ -137,3 +137,33 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); ou
 .photo-rules li { margin: 2px 0; }
 .photo-rules .yes { background: var(--good-bg); color: var(--good); }
 .photo-rules .no { background: var(--bad-bg); color: var(--bad); }
+
+/* Look cards: items with hearts and Shop buttons */
+.rate-look .kicker { margin-bottom: 4px; }
+.rate-look .story { font-family: var(--serif); font-style: italic; font-size: 16px; margin: 12px 0 4px; }
+.shop-head { font: 600 12px/1 var(--sans); letter-spacing: 1.6px; text-transform: uppercase; color: var(--soft); margin: 16px 0 4px; }
+.item, .fav { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+.item-text { flex: 1; min-width: 0; }
+.item-brand { font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--soft); }
+.item-name { font-size: 15px; line-height: 1.35; }
+.item-price { font-size: 13px; color: var(--soft); }
+.heart { border: 0; background: none; font-size: 24px; line-height: 1; color: var(--soft); cursor: pointer; padding: 6px; }
+.heart.on { color: var(--accent); }
+.btn.small { padding: 10px 16px; font-size: 14px; }
+.looks-links { font-size: 15px; margin: 8px 0 0; }
+
+/* "Your looks" page */
+.tabs { display: flex; gap: 8px; margin: 14px 0 16px; }
+.tab { flex: 1; border: 1px solid #d9cfc2; background: #fff; color: var(--ink); border-radius: 999px; padding: 11px; font: 600 15px/1 var(--sans); cursor: pointer; }
+.tab.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.week-label { margin: 22px 0 10px; }
+.thumb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.thumb { border: 0; padding: 0; background: none; text-align: left; cursor: pointer; }
+.thumb img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 10px; display: block; background: var(--chip); }
+.thumb-title { display: block; font-family: var(--serif); font-size: 14px; margin-top: 6px; color: var(--ink); }
+.fav img { width: 64px; height: 80px; object-fit: cover; border-radius: 8px; flex: none; }
+.fav-empty { font-size: 48px; color: var(--line); text-align: center; margin-top: 30px; }
+.viewer { position: fixed; inset: 0; background: rgba(42, 36, 32, .55); z-index: 50; overflow-y: auto; padding: 16px; }
+.viewer-box { max-width: 560px; margin: 0 auto; background: var(--card); border-radius: 16px; padding: 18px 16px 4px; position: relative; }
+.viewer-box .rate-look { margin-top: 0; }
+.viewer-close { position: absolute; top: 6px; right: 10px; border: 0; background: none; font-size: 30px; line-height: 1; cursor: pointer; color: var(--ink); }

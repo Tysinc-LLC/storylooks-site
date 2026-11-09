@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your looks · StoryLooks</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="narrow">
+  <header class="top"><a class="wordmark" href="./">STORYLOOKS</a></header>
+  <h1 style="font-size:34px;" id="hello">Your looks</h1>
+  <div class="tabs" role="tablist">
+    <button type="button" class="tab" data-tab="past" role="tab">Past looks</button>
+    <button type="button" class="tab" data-tab="favorites" role="tab">Favorites</button>
+  </div>
+  <div id="msg" class="hidden" role="status"></div>
+
+  <section id="past" class="hidden">
+    <p class="muted">Every look we've made for you. Tap one to see it bigger, with its items.</p>
+    <div id="weeks"></div>
+    <button type="button" class="btn ghost hidden" id="more" style="width:100%;margin-top:16px;">Show older looks</button>
+  </section>
+
+  <section id="favorites" class="hidden">
+    <p class="muted">Tap the heart on any item in your looks to save it here.</p>
+    <div id="fav-list"></div>
+  </section>
+
+  <p class="fine center" style="margin-top:28px;"><a id="back">Back to this week's looks</a></p>
+</div>
+
+<div id="viewer" class="viewer hidden" role="dialog" aria-modal="true">
+  <div class="viewer-box">
+    <button type="button" class="viewer-close" aria-label="Close">×</button>
+    <div id="viewer-card"></div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  const t = param('t');
+  const msg = document.getElementById('msg');
+  document.getElementById('back').href = `week.html?t=${encodeURIComponent(t || '')}`;
+  if (!t) showMessage(msg, 'Open this page from a StoryLooks email.', false);
+
+  // ----- tabs (Past looks / Favorites), remembered in the address so the email links can open either one -----
+  const loaded = {};
+  function show(tab) {
+    document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
+    document.getElementById('past').classList.toggle('hidden', tab !== 'past');
+    document.getElementById('favorites').classList.toggle('hidden', tab !== 'favorites');
+    history.replaceState(null, '', `#${tab}`);
+    if (!loaded[tab] && t) { loaded[tab] = true; tab === 'past' ? loadPast() : loadFavorites(); }
+  }
+  document.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => show(b.dataset.tab)));
+
+  // ----- past looks: a grid of photos per week; tap one to open the full look -----
+  const weeks = document.getElementById('weeks');
+  const more = document.getElementById('more');
+  let last = null;
+  async function loadPast() {
+    more.disabled = true;
+    const r = await postJSON('account', { t, action: 'past', ...(last ? { before: last } : {}) }).catch(() => ({ ok: false }));
+    more.disabled = false;
+    if (!r.ok) { showMessage(msg, r.message || 'Could not load your looks. Try again.', false); return; }
+    if (!r.issues.length && !last) weeks.appendChild(el('p', 'muted', 'Your looks will collect here.'));
+    for (const issue of r.issues) {
+      weeks.appendChild(el('div', 'kicker week-label', issue.label || ''));
+      const grid = el('div', 'thumb-grid');
+      for (const look of issue.looks) {
+        const b = el('button', 'thumb');
+        b.type = 'button';
+        if (look.image) { const img = el('img'); img.src = look.image; img.alt = look.title; img.loading = 'lazy'; b.appendChild(img); }
+        b.appendChild(el('span', 'thumb-title', look.title));
+        b.addEventListener('click', () => openLook(look));
+        grid.appendChild(b);
+      }
+      weeks.appendChild(grid);
+      last = issue.sent_at;
+    }
+    more.classList.toggle('hidden', !r.more);
+  }
+  more.addEventListener('click', loadPast);
+
+  const viewer = document.getElementById('viewer');
+  function openLook(look) {
+    const box = document.getElementById('viewer-card');
+    box.innerHTML = '';
+    box.appendChild(lookCard(t, look));
+    viewer.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLook() {
+    viewer.classList.add('hidden');
+    document.body.style.overflow = '';
+    loaded.favorites = false; // hearts may have changed
+  }
+  viewer.querySelector('.viewer-close').addEventListener('click', closeLook);
+  viewer.addEventListener('click', (e) => { if (e.target === viewer) closeLook(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !viewer.classList.contains('hidden')) closeLook(); });
+
+  // ----- favorites: every hearted item, with its Shop button -----
+  async function loadFavorites() {
+    const list = document.getElementById('fav-list');
+    list.innerHTML = '';
+    const r = await postJSON('account', { t, action: 'favorites' }).catch(() => ({ ok: false }));
+    if (!r.ok) { showMessage(msg, r.message || 'Could not load your favorites. Try again.', false); return; }
+    if (!r.items.length) { list.appendChild(el('p', 'fav-empty', '♡')); return; }
+    for (const item of r.items) {
+      const row = el('div', 'fav');
+      if (item.image) { const img = el('img'); img.src = item.image; img.alt = ''; img.loading = 'lazy'; row.appendChild(img); }
+      const text = el('div', 'item-text');
+      text.append(el('div', 'item-brand', item.brand), el('div', 'item-name', item.name), el('div', 'item-price', item.price));
+      row.appendChild(text);
+      if (item.look_id && item.n >= 0) row.appendChild(heartButton(t, item.look_id, item.n, true));
+      const shop = el('a', 'btn small', 'Shop');
+      shop.href = item.shop;
+      shop.target = '_blank';
+      shop.rel = 'noopener';
+      row.appendChild(shop);
+      list.appendChild(row);
+    }
+  }
+
+  show(location.hash === '#favorites' ? 'favorites' : 'past');
+</script>
+</body>
+</html>
