@@ -118,7 +118,9 @@ function lookCard(t, look, { label, ratings = true } = {}) {
     for (const p of look.products) {
       const row = el('div', 'item');
       const text = el('div', 'item-text');
-      text.append(el('div', 'item-brand', p.brand), el('div', 'item-name', p.name), el('div', 'item-price', p.price));
+      text.append(el('div', 'item-brand', p.brand), el('div', 'item-name', p.label || p.name));
+      if (p.label) text.appendChild(el('div', 'item-price', p.name));
+      text.appendChild(el('div', 'item-price', p.price));
       const shop = el('a', 'btn small', 'Shop');
       shop.href = p.shop;
       shop.target = '_blank';

@@ -117,7 +117,30 @@
         label.append(input, span);
         row.appendChild(label);
       }
+      // "Other…" opens a small box to type their own answer (not for the email/app question).
+      if (q.id === 'delivery') { block.appendChild(row); box.appendChild(block); continue; }
+      const otherLabel = document.createElement('label');
+      const otherInput = document.createElement('input');
+      otherInput.type = q.many ? 'checkbox' : 'radio';
+      otherInput.name = q.id;
+      otherInput.value = '__other';
+      const otherSpan = document.createElement('span');
+      otherSpan.textContent = 'Other…';
+      otherLabel.append(otherInput, otherSpan);
+      row.appendChild(otherLabel);
       block.appendChild(row);
+      const typed = document.createElement('input');
+      typed.type = 'text';
+      typed.id = `other-${q.id}`;
+      typed.maxLength = 100;
+      typed.placeholder = 'Tell us in a few words';
+      typed.className = 'hidden';
+      typed.style.marginTop = '10px';
+      block.appendChild(typed);
+      row.addEventListener('change', () => {
+        typed.classList.toggle('hidden', !otherInput.checked);
+        if (otherInput.checked && document.activeElement !== typed) typed.focus();
+      });
       box.appendChild(block);
     }
   }).catch(() => {});
@@ -128,18 +151,22 @@
     const extra = document.getElementById('text').value.trim();
     const text = [picks.join(', '), extra].filter(Boolean).join('. ');
     const answers = {};
+    const other = {};
     for (const q of questions) {
       const chosen = [...document.querySelectorAll(`input[name="${q.id}"]:checked`)].map((i) => i.value);
-      if (chosen.length) answers[q.id] = chosen;
+      const typed = document.getElementById(`other-${q.id}`)?.value.trim();
+      if (chosen.includes('__other') && typed) other[q.id] = typed;
+      const picks = chosen.filter((c) => c !== '__other');
+      if (picks.length) answers[q.id] = picks;
     }
-    if (!text && !Object.keys(answers).length) {
+    if (!text && !Object.keys(answers).length && !Object.keys(other).length) {
       // Ratings save as they're tapped, so Send with nothing else filled in is fine too.
       const rated = document.querySelector('.pill.on');
       showMessage(msg, rated ? 'Thanks! Your ratings are saved.' : 'Pick something or type a few words first.', Boolean(rated));
       return;
     }
     send.disabled = true;
-    const r = await postJSON('account', { t, action: 'week', text, answers }).catch(() => ({ ok: false }));
+    const r = await postJSON('account', { t, action: 'week', text, answers, other }).catch(() => ({ ok: false }));
     showMessage(msg, r.message || 'Something went wrong. Please try again.', r.ok);
     if (r.ok) send.classList.add('hidden'); else send.disabled = false;
   });

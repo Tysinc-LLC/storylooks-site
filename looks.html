@@ -113,7 +113,9 @@
       const row = el('div', 'fav');
       if (item.image) { const img = el('img'); img.src = item.image; img.alt = ''; img.loading = 'lazy'; row.appendChild(img); }
       const text = el('div', 'item-text');
-      text.append(el('div', 'item-brand', item.brand), el('div', 'item-name', item.name), el('div', 'item-price', item.price));
+      text.append(el('div', 'item-brand', item.brand), el('div', 'item-name', item.label || item.name));
+      if (item.label) text.appendChild(el('div', 'item-price', item.name));
+      text.appendChild(el('div', 'item-price', item.price));
       row.appendChild(text);
       if (item.look_id && item.n >= 0) row.appendChild(heartButton(t, item.look_id, item.n, true));
       const shop = el('a', 'btn small', 'Shop');
