@@ -59,12 +59,17 @@
         <select id="height_in" name="height_in" aria-label="Inches"><option value="">Inches</option><option value="0">0 in</option><option value="1">1 in</option><option value="2">2 in</option><option value="3">3 in</option><option value="4">4 in</option><option value="5">5 in</option><option value="6">6 in</option><option value="7">7 in</option><option value="8">8 in</option><option value="9">9 in</option><option value="10">10 in</option><option value="11">11 in</option></select>
       </div>
       <div class="row">
-        <div><label for="top">Top size</label><input id="top" name="top" type="text" placeholder="S, M, L, XL…" required></div>
-        <div><label for="pants">Pants size</label><input id="pants" name="pants" type="text" placeholder="8, or 32×30" required></div>
+        <div><label for="top">Top size</label><select id="top" name="top"></select></div>
+        <div><label for="shoe">Shoe size</label><select id="shoe" name="shoe"></select></div>
       </div>
-      <div class="row">
-        <div><label for="shoe">Shoe size</label><input id="shoe" name="shoe" type="text" inputmode="decimal" required></div>
-        <div><label for="dress">Dress size <span class="muted">(optional)</span></label><input id="dress" name="dress" type="text"></div>
+      <span class="label" id="pants-label">Pants size</span>
+      <div class="pair">
+        <select id="pants" name="pants" aria-labelledby="pants-label"></select>
+        <select id="inseam" name="inseam" aria-label="Inseam"></select>
+      </div>
+      <div id="dress-box">
+        <label for="dress">Dress size <span class="muted">(optional)</span></label>
+        <select id="dress" name="dress"></select>
       </div>
     </div>
 
@@ -160,7 +165,7 @@
     }
     if (n === 2) {
       if (!v('height_ft') || !v('height_in')) return 'Please choose your height in feet and inches.';
-      for (const [k, label] of [['top', 'top size'], ['pants', 'pants size'], ['shoe', 'shoe size']]) if (!v(k)) return `Please add your ${label}.`;
+      for (const [k, label] of [['top', 'top size'], ['shoe', 'shoe size'], ['pants', 'pants size'], ['inseam', 'pants length']]) if (!v(k)) return `Please choose your ${label}.`;
     }
     if (n === 3) {
       if (!face().length) return 'Please add a face photo.';
@@ -174,7 +179,28 @@
     return null;
   }
 
+  // Size choices follow the clothing picked in step 1, and match how the stores list their sizes.
+  const fill = (id, first, list, keep) => {
+    const el = document.getElementById(id);
+    const old = keep ? el.value : '';
+    el.innerHTML = `<option value="">${first}</option>` + list.map((x) => `<option value="${x}">${x}</option>`).join('');
+    if (list.map(String).includes(old)) el.value = old;
+  };
+  const range = (from, to, step = 1) => { const out = []; for (let x = from; x <= to + 1e-9; x += step) out.push(String(x)); return out; };
+  function fillSizes() {
+    const women = form.clothing.value === "women's";
+    fill('top', 'Choose', ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'], true);
+    fill('shoe', 'Choose', women ? range(5, 12, 0.5) : range(6, 15, 0.5), true);
+    fill('pants', women ? 'Size' : 'Waist', women ? ['00', '0', ...range(2, 24, 2)] : range(28, 44), true);
+    fill('inseam', 'Length', women ? ['Short', 'Regular', 'Long'] : range(28, 36, 2), true);
+    fill('dress', 'Choose', ['00', '0', ...range(2, 24, 2)], true);
+    document.getElementById('pants-label').textContent = women ? 'Pants size and length' : 'Pants waist and length';
+    document.getElementById('dress-box').classList.toggle('hidden', !women);
+    if (!women) form.dress.value = '';
+  }
+
   function show(n, scroll = true) {
+    if (n === 2) fillSizes();
     step = n;
     steps.forEach((el) => el.classList.toggle('hidden', Number(el.dataset.step) !== n));
     document.querySelectorAll('.steps-bar span').forEach((el, i) => el.classList.toggle('on', i < n));
@@ -204,7 +230,7 @@
     submit.disabled = true;
     showMessage(msg, 'Getting your photos ready…', true);
     const data = new FormData();
-    for (const n of ['name', 'last_name', 'email', 'clothing', 'age', 'zip', 'height_ft', 'height_in', 'occupation', 'top', 'pants', 'shoe', 'dress', 'brands', 'interests', 'teams', 'has_pet', 'pet_name', 'pet_kind', 'website']) {
+    for (const n of ['name', 'last_name', 'email', 'clothing', 'age', 'zip', 'height_ft', 'height_in', 'occupation', 'top', 'pants', 'inseam', 'shoe', 'dress', 'brands', 'interests', 'teams', 'has_pet', 'pet_name', 'pet_kind', 'website']) {
       data.append(n, form.elements[n]?.value ?? '');
     }
     for (const n of ['consent_age', 'consent_photos', 'consent_controls']) if (form.elements[n].checked) data.append(n, 'yes');
