@@ -139,3 +139,17 @@ function lookCard(t, look, { label, ratings = true } = {}) {
   }
   return card;
 }
+
+// A look that isn't ready yet: still being made, or (app drops) arriving later in the week.
+function waitingCard(look, label) {
+  const card = el('div', 'rate-look waiting');
+  if (label) card.appendChild(el('div', 'kicker', label));
+  if (look.upcoming) {
+    const day = new Date(look.release_at).toLocaleDateString('en-US', { weekday: 'long' });
+    card.append(el('h3', '', `Arrives ${day}`), el('p', 'muted', 'A new look drops on its day.'));
+  } else {
+    card.append(el('h3', '', look.title || 'Your next look'), el('div', 'spinner'),
+      el('p', 'muted', 'Making your look… it usually takes about a minute.'));
+  }
+  return card;
+}

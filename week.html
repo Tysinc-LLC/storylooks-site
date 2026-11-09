@@ -51,11 +51,30 @@
   let questions = [];
 
   function showLooks(looks) {
-    looks.forEach((look, i) => looksBox.appendChild(lookCard(t, look, { label: `Look ${i + 1} of ${looks.length}` })));
+    looksBox.innerHTML = '';
+    looks.forEach((look, i) => {
+      const label = `Look ${i + 1} of ${looks.length}`;
+      looksBox.appendChild(look.pending || look.upcoming ? waitingCard(look, label) : lookCard(t, look, { label }));
+    });
     if (looks.length) {
       const h = el('h2', '', "Help shape next week's looks");
       h.style.margin = '30px 0 0';
       looksBox.appendChild(h);
+    }
+  }
+
+  // Looks made on tap: opening this page starts them; check back every 12 seconds until they're all in.
+  const stillMaking = (looks) => looks.filter((l) => l.pending).length;
+  async function finishTheRest(issueId, looks) {
+    if (looks.some((l) => l.on_demand)) await postJSON('account', { t, action: 'make_rest', i: issueId }).catch(() => {});
+    let waiting = stillMaking(looks);
+    for (let tries = 0; waiting && tries < 60; tries++) {
+      await new Promise((r) => setTimeout(r, 12000));
+      const r = await postJSON('account', { t, action: 'info', i: issueId }).catch(() => ({ ok: false }));
+      if (!r.ok) continue;
+      const now = stillMaking(r.looks || []);
+      if (now < waiting) showLooks(r.looks || []);
+      waiting = now;
     }
   }
 
@@ -65,6 +84,7 @@
     const looks = r.looks || [];
     document.getElementById('hello').textContent = looks.length ? `How did we do, ${r.name}?` : `Help shape next week's looks, ${r.name}`;
     showLooks(looks);
+    if (stillMaking(looks) && r.issue) finishTheRest(r.issue.id, looks);
     questions = r.questions || [];
     for (const q of questions) {
       const block = document.createElement('div');

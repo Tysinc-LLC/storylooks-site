@@ -70,7 +70,7 @@
     for (const issue of r.issues) {
       weeks.appendChild(el('div', 'kicker week-label', issue.label || ''));
       const grid = el('div', 'thumb-grid');
-      for (const look of issue.looks) {
+      for (const look of issue.looks.filter((l) => !l.pending && !l.upcoming)) {
         const b = el('button', 'thumb');
         b.type = 'button';
         if (look.image) { const img = el('img'); img.src = look.image; img.alt = look.title; img.loading = 'lazy'; b.appendChild(img); }
@@ -79,7 +79,7 @@
         grid.appendChild(b);
       }
       weeks.appendChild(grid);
-      last = issue.sent_at;
+      last = issue.cursor;
     }
     more.classList.toggle('hidden', !r.more);
   }
