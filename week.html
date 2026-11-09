@@ -52,9 +52,13 @@
 
   function showLooks(looks) {
     looksBox.innerHTML = '';
+    // Show finished looks in order: if look 2 is still being made, look 3 waits too.
+    let earlierWaiting = false;
     looks.forEach((look, i) => {
       const label = `Look ${i + 1} of ${looks.length}`;
-      looksBox.appendChild(look.pending || look.upcoming ? waitingCard(look, label) : lookCard(t, look, { label }));
+      const wait = look.pending || look.upcoming || (earlierWaiting && !look.upcoming);
+      if (look.pending) earlierWaiting = true;
+      looksBox.appendChild(wait ? waitingCard(look.upcoming ? look : { ...look, upcoming: false }, label) : lookCard(t, look, { label }));
     });
     if (looks.length) {
       const h = el('h2', '', "Help shape next week's looks");
@@ -73,7 +77,7 @@
       const r = await postJSON('account', { t, action: 'info', i: issueId }).catch(() => ({ ok: false }));
       if (!r.ok) continue;
       const now = stillMaking(r.looks || []);
-      if (now < waiting) showLooks(r.looks || []);
+      if (now !== waiting) showLooks(r.looks || []);
       waiting = now;
     }
   }
