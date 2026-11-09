@@ -174,7 +174,7 @@
     return null;
   }
 
-  function show(n) {
+  function show(n, scroll = true) {
     step = n;
     steps.forEach((el) => el.classList.toggle('hidden', Number(el.dataset.step) !== n));
     document.querySelectorAll('.steps-bar span').forEach((el, i) => el.classList.toggle('on', i < n));
@@ -183,7 +183,7 @@
     next.classList.toggle('hidden', n === steps.length);
     submit.classList.toggle('hidden', n !== steps.length);
     msg.className = 'hidden';
-    form.scrollIntoView({ block: 'start' });
+    if (scroll) form.scrollIntoView({ block: 'start' });
   }
 
   next.addEventListener('click', () => {
@@ -192,7 +192,7 @@
     show(step + 1);
   });
   back.addEventListener('click', () => show(step - 1));
-  show(1);
+  show(1, false);
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
