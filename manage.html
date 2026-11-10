@@ -29,6 +29,16 @@
       <div class="actions"><button class="btn" id="upload">Add these photos</button></div>
     </div>
 
+    <div class="panel hidden" id="delivery">
+      <h2>How you get your looks</h2>
+      <p class="muted" id="delivery-now"></p>
+      <div class="actions">
+        <button class="btn ghost" data-delivery="both" id="d-both">App + Saturday recap email</button>
+        <button class="btn ghost" data-delivery="email" id="d-email">Just the Saturday email</button>
+      </div>
+      <p class="fine">Changes start with next week's looks.</p>
+    </div>
+
     <div class="panel">
       <h2>Pause or stop</h2>
       <p class="muted">Pause to take a break (your photos stay saved), or unsubscribe to stop the emails.</p>
@@ -63,6 +73,27 @@
     document.getElementById('resume').classList.toggle('hidden', !stopped);
   }
 
+  // For people with the app: app + email, or just the Saturday email (e.g. if they stopped using the app).
+  // App only is chosen in the app itself.
+  const deliveryText = {
+    both: 'In the app Monday, Wednesday and Friday, plus a Saturday email that rounds up your week.',
+    email: 'By email every Saturday morning: your whole week ahead.',
+    app: 'In the app only, Monday, Wednesday and Friday.',
+  };
+  function showDelivery(d) {
+    document.getElementById('delivery-now').textContent = 'Right now: ' + (deliveryText[d] || d);
+    document.getElementById('d-both').classList.toggle('hidden', d === 'both');
+    document.getElementById('d-email').classList.toggle('hidden', d === 'email');
+  }
+  document.querySelectorAll('[data-delivery]').forEach((btn) => btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    const r = await postJSON('account', { t, action: 'settings', delivery: btn.dataset.delivery });
+    btn.disabled = false;
+    showMessage(msg, r.message || 'Something went wrong.', r.ok);
+    scrollTo(0, 0);
+    if (r.ok) showDelivery(r.delivery);
+  }));
+
   async function load() {
     if (!t) { showMessage(msg, 'This link is missing something. Use the link at the bottom of any StoryLooks email.', false); return; }
     const r = await postJSON('account', { t, action: 'info' });
@@ -71,6 +102,7 @@
     document.getElementById('email').textContent = r.email;
     if (r.pet) document.getElementById('petchoice').classList.remove('hidden');
     showStatus(r.status);
+    if (r.has_app) { document.getElementById('delivery').classList.remove('hidden'); showDelivery(r.delivery); }
     page.classList.remove('hidden');
     if (location.hash) document.querySelector(location.hash)?.scrollIntoView();
   }
