@@ -182,3 +182,9 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); ou
 .report > div { display: grid; gap: 8px; margin-top: 8px; text-align: left; }
 .linklike { background: none; border: 0; padding: 0; color: var(--soft); font: 13px var(--sans); text-decoration: underline; cursor: pointer; }
 .sale { color: var(--accent); font-weight: 600; }
+
+/* Your photos on the manage page */
+.photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 6px 0 14px; }
+.photo-tile { margin: 0; display: grid; gap: 4px; justify-items: start; font: 13px var(--sans); }
+.photo-tile img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 10px; background: var(--chip, #f7f2ec); }
+.photo-tile figcaption { font-weight: 600; }
