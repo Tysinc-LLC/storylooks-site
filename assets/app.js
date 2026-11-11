@@ -137,9 +137,73 @@ function lookCard(t, look, { label, ratings = true } = {}) {
       (ok, c) => tip.classList.toggle('hidden', !(ok && Number(c) <= 2))));
     card.appendChild(tip);
     card.appendChild(el('div', 'rate-q', 'Would you wear it?'));
-    card.appendChild(ratingRow(t, look, 'would_wear', ['Yes', 'Maybe', 'No'], look.would_wear, false));
+    const miss = missBox(t, look);
+    card.appendChild(ratingRow(t, look, 'would_wear', ['Yes', 'Maybe', 'No'], look.would_wear, false,
+      (ok, c) => miss.classList.toggle('hidden', !(ok && c !== 'Yes'))));
+    if (look.would_wear && look.would_wear !== 'Yes') miss.classList.remove('hidden');
+    card.appendChild(miss);
   }
+  card.appendChild(reportLink(t, look, card));
   return card;
+}
+
+// After "Would you wear it?" No or Maybe: which pieces didn't work, and why (all optional).
+const MISS_REASONS = ['Not my style', 'Color', 'Too dressy', 'Too casual', 'Fit', 'Price'];
+function missBox(t, look) {
+  const box = el('div', 'miss hidden');
+  if (look.missed) { box.appendChild(el('p', 'fine', "Got it. We'll steer away from that.")); return box; }
+  const items = new Set(), reasons = new Set();
+  const pills = (list, set) => {
+    const row = el('div', 'pills');
+    list.forEach(([label, value]) => {
+      const b = el('button', 'pill', label);
+      b.type = 'button';
+      b.addEventListener('click', () => { set.has(value) ? set.delete(value) : set.add(value); b.classList.toggle('on', set.has(value)); });
+      row.appendChild(b);
+    });
+    return row;
+  };
+  const send = el('button', 'btn small', 'Send');
+  send.type = 'button';
+  send.addEventListener('click', async () => {
+    if (!items.size && !reasons.size) return;
+    send.disabled = true;
+    const r = await postJSON('account', { t, action: 'item_feedback', look: look.id, items: [...items], reasons: [...reasons] }).catch(() => ({ ok: false }));
+    send.disabled = false;
+    if (r.ok) box.replaceChildren(el('p', 'fine', r.message));
+  });
+  box.append(el('div', 'rate-q', "What didn't work? (optional)"),
+    pills((look.products || []).map((p) => [p.label || p.name, p.n]), items), pills(MISS_REASONS.map((r) => [r, r]), reasons), send);
+  return box;
+}
+
+// "Report a problem" with a look. Something inappropriate removes the look right away.
+function reportLink(t, look, card) {
+  const wrap = el('div', 'report');
+  const open = el('button', 'linklike', 'Report a problem');
+  open.type = 'button';
+  const form = el('div', 'hidden');
+  const reasons = ["Doesn't look like me", 'Wrong or missing item', 'Something inappropriate', 'Something else'];
+  const select = el('select');
+  select.innerHTML = '<option value="">What\'s wrong?</option>' + reasons.map((r) => `<option>${r}</option>`).join('');
+  const note = el('textarea');
+  note.placeholder = 'Anything to add? (optional)';
+  note.maxLength = 500;
+  const send = el('button', 'btn small', 'Send report');
+  send.type = 'button';
+  open.addEventListener('click', () => form.classList.toggle('hidden'));
+  send.addEventListener('click', async () => {
+    if (!select.value) return;
+    send.disabled = true;
+    const r = await postJSON('account', { t, action: 'report', look: look.id, reason: select.value, note: note.value }).catch(() => ({ ok: false }));
+    send.disabled = false;
+    if (!r.ok) return;
+    if (r.hidden) card.replaceChildren(el('p', 'muted', 'This look was removed. Thanks for telling us.'));
+    else wrap.replaceChildren(el('p', 'fine', r.message));
+  });
+  form.append(select, note, send);
+  wrap.append(open, form);
+  return wrap;
 }
 
 // A look that isn't ready yet: still being made, or (app drops) arriving later in the week.

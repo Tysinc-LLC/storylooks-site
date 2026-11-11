@@ -172,3 +172,10 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); ou
 .rate-look.waiting { text-align: center; padding: 26px 16px; background: var(--chip); border-radius: 14px; }
 .spinner { width: 34px; height: 34px; margin: 16px auto 8px; border: 3px solid var(--line); border-top-color: var(--ink); border-radius: 50%; animation: spin 0.9s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* What didn't work, Report a problem, sale prices */
+.miss { margin-top: 12px; display: grid; gap: 8px; justify-items: start; }
+.report { margin-top: 10px; text-align: right; }
+.report > div { display: grid; gap: 8px; margin-top: 8px; text-align: left; }
+.linklike { background: none; border: 0; padding: 0; color: var(--soft); font: 13px var(--sans); text-decoration: underline; cursor: pointer; }
+.sale { color: var(--accent); font-weight: 600; }

@@ -92,6 +92,11 @@
       <p class="fine">Changes start with next week's looks.</p>
     </div>
 
+    <div class="panel" id="sales">
+      <h2>Sale alerts</h2>
+      <label class="check"><input type="checkbox" id="sale-alerts"><span>Tell me when something I hearted goes on sale. Price drops are listed in my Saturday email (and the app sends a heads-up at most once a week).</span></label>
+    </div>
+
     <div class="panel">
       <h2>Pause or stop</h2>
       <p class="muted">Pause to take a break (your photos stay saved), or unsubscribe to stop StoryLooks emails. (If you use the app, your looks keep coming there.)</p>
@@ -221,6 +226,12 @@
     if (r.ok) { $('dform').classList.add('hidden'); $('d-open').classList.remove('hidden'); if (r.ok && $('d-haspet').checked) $('petchoice').classList.remove('hidden'); }
   });
 
+  document.getElementById('sale-alerts').addEventListener('change', async (e) => {
+    const r = await postJSON('account', { t, action: 'sale_alerts', on: e.target.checked });
+    showMessage(msg, r.message || 'Something went wrong.', r.ok);
+    scrollTo(0, 0);
+  });
+
   async function load() {
     if (!t) { showMessage(msg, 'This link is missing something. Use the link at the bottom of any StoryLooks email.', false); return; }
     const r = await postJSON('account', { t, action: 'info' });
@@ -229,6 +240,7 @@
     document.getElementById('email').textContent = r.email;
     if (r.pet) document.getElementById('petchoice').classList.remove('hidden');
     showStatus(r.status);
+    document.getElementById('sale-alerts').checked = r.sale_alerts !== false;
     if (r.has_app) { document.getElementById('delivery').classList.remove('hidden'); showDelivery(r.delivery); }
     page.classList.remove('hidden');
     if (location.hash) document.querySelector(location.hash)?.scrollIntoView();

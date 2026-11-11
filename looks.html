@@ -116,7 +116,10 @@
       const text = el('div', 'item-text');
       text.append(el('div', 'item-brand', item.brand), el('div', 'item-name', item.label || item.name));
       if (item.label) text.appendChild(el('div', 'item-price', item.name));
-      text.appendChild(el('div', 'item-price', item.price));
+      // Today's price, with the price when they hearted it crossed out if it dropped. Sold out if gone.
+      if (item.sold_out) text.appendChild(el('div', 'item-price sale', 'Sold out'));
+      else if (item.was) { const pr = el('div', 'item-price'); pr.innerHTML = `<s>${item.was}</s> <span class="sale">${item.price} Sale</span>`; text.appendChild(pr); }
+      else text.appendChild(el('div', 'item-price', item.price));
       row.appendChild(text);
       if (item.look_id && item.n >= 0) row.appendChild(heartButton(t, item.look_id, item.n, true));
       const shop = el('a', 'btn small', 'Shop');
