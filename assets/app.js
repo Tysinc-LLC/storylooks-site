@@ -87,7 +87,7 @@ function ratingRow(t, look, q, choices, current, round, onSaved) {
 }
 
 // A heart that saves the item to Favorites (or takes it off) without leaving the page.
-function heartButton(t, lookId, n, hearted) {
+function heartButton(t, lookId, n, hearted, catalogId) {
   const b = el('button', `heart${hearted ? ' on' : ''}`);
   b.type = 'button';
   const paint = () => {
@@ -100,7 +100,9 @@ function heartButton(t, lookId, n, hearted) {
     const on = !b.classList.contains('on');
     b.classList.toggle('on', on);
     paint();
-    const r = await postJSON('account', { t, action: 'favorite', look: lookId, p: n, on }).catch(() => ({ ok: false }));
+    // An item that can't be found in its look anymore can still be removed by the item itself.
+    const body = n >= 0 ? { look: lookId, p: n } : { catalog_id: catalogId };
+    const r = await postJSON('account', { t, action: 'favorite', ...body, on }).catch(() => ({ ok: false }));
     if (!r.ok) { b.classList.toggle('on', !on); paint(); }
   });
   return b;

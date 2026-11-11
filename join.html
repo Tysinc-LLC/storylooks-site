@@ -62,10 +62,9 @@
         <div><label for="top">Top size</label><select id="top" name="top"></select></div>
         <div><label for="shoe">Shoe size</label><select id="shoe" name="shoe"></select></div>
       </div>
-      <span class="label" id="pants-label">Pants size</span>
-      <div class="pair">
-        <select id="pants" name="pants" aria-labelledby="pants-label"></select>
-        <select id="inseam" name="inseam" aria-label="Inseam"></select>
+      <div class="row">
+        <div><label for="pants" id="pants-label">Waist (optional)</label><select id="pants" name="pants"></select></div>
+        <div><label for="inseam">Length (optional)</label><select id="inseam" name="inseam"></select></div>
       </div>
       <p class="hint" style="margin-top:6px;">Not sure of your length? Leave it, and we'll match on size.</p>
       <div id="dress-box">
@@ -223,10 +222,10 @@
     const women = form.clothing.value === "women's";
     fill('top', 'Choose', ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'], true);
     fill('shoe', 'Choose', women ? range(5, 12, 0.5) : range(6, 15, 0.5), true);
-    fill('pants', women ? 'Size' : 'Waist', women ? ['00', '0', ...range(2, 24, 2)] : range(28, 44), true);
-    fill('inseam', 'Length: not sure', women ? ['Short', 'Regular', 'Long'] : range(28, 36, 2), true);
+    fill('pants', 'Not sure', women ? ['00', '0', ...range(2, 24, 2)] : range(28, 44), true);
+    fill('inseam', 'Not sure', women ? ['Short', 'Regular', 'Long'] : range(28, 36, 2), true);
     fill('dress', 'Choose', ['00', '0', ...range(2, 24, 2)], true);
-    document.getElementById('pants-label').textContent = women ? 'Pants size and length (optional)' : 'Pants waist and length (optional)';
+    document.getElementById('pants-label').textContent = women ? 'Pants size (optional)' : 'Waist (optional)';
     document.getElementById('dress-box').classList.toggle('hidden', !women);
     if (!women) form.dress.value = '';
   }

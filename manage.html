@@ -59,19 +59,17 @@
           <div><label for="d-age">Age</label><input id="d-age" type="number" inputmode="numeric" min="18" max="110"></div>
           <div><label for="d-zip">Zip code</label><input id="d-zip" type="text" inputmode="numeric" maxlength="10"></div>
         </div>
-        <span class="label">Height</span>
-        <div class="pair">
-          <select id="d-ft" aria-label="Feet"></select>
-          <select id="d-in" aria-label="Inches"></select>
+        <div class="row">
+          <div><label for="d-ft">Height: feet</label><select id="d-ft"></select></div>
+          <div><label for="d-in">Inches</label><select id="d-in"></select></div>
         </div>
         <div class="row">
           <div><label for="d-top">Top size</label><select id="d-top"></select></div>
           <div><label for="d-shoe">Shoe size</label><select id="d-shoe"></select></div>
         </div>
-        <span class="label" id="d-pants-label">Pants size and length</span>
-        <div class="pair">
-          <select id="d-pants" aria-labelledby="d-pants-label"></select>
-          <select id="d-inseam" aria-label="Length"></select>
+        <div class="row">
+          <div><label for="d-pants" id="d-pants-label">Waist</label><select id="d-pants"></select></div>
+          <div><label for="d-inseam">Length</label><select id="d-inseam"></select></div>
         </div>
         <div id="d-dress-box"><label for="d-dress">Dress size <span class="muted">(optional)</span></label><select id="d-dress"></select></div>
         <h3 style="margin:22px 0 6px;">Your style</h3>
@@ -178,8 +176,9 @@
     const women = document.querySelector('input[name="d-clothing"]:checked')?.value === "women's";
     fill('d-top', 'Choose', ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'], sizes.top);
     fill('d-shoe', 'Choose', women ? range(5, 12, 0.5) : range(6, 15, 0.5), sizes.shoe);
-    fill('d-pants', women ? 'Size' : 'Waist', women ? ['00', '0', ...range(2, 24, 2)] : range(28, 44), sizes.pants);
-    fill('d-inseam', 'Length: not sure', women ? ['Short', 'Regular', 'Long'] : range(28, 36, 2), sizes.inseam);
+    $('d-pants-label').textContent = women ? 'Pants size' : 'Waist';
+    fill('d-pants', 'Choose', women ? ['00', '0', ...range(2, 24, 2)] : range(28, 44), sizes.pants);
+    fill('d-inseam', 'Not sure', women ? ['Short', 'Regular', 'Long'] : range(28, 36, 2), sizes.inseam);
     fill('d-dress', 'Choose', ['00', '0', ...range(2, 24, 2)], sizes.dress);
     $('d-dress-box').classList.toggle('hidden', !women);
   }
@@ -195,7 +194,7 @@
     $('d-first').value = details.first_name || ''; $('d-last').value = details.last_name || '';
     const c = document.querySelector(`input[name="d-clothing"][value="${details.clothing}"]`); if (c) c.checked = true;
     $('d-age').value = details.age || ''; $('d-zip').value = details.zip || '';
-    fill('d-ft', 'Feet', range(4, 7), details.height_ft); fill('d-in', 'Inches', range(0, 11), details.height_in);
+    fill('d-ft', 'Choose', range(4, 7), details.height_ft); fill('d-in', 'Choose', range(0, 11), details.height_in);
     fillSizes(details.sizes || {});
     $('d-job').value = details.occupation || ''; $('d-interests').value = details.interests || '';
     $('d-teams').value = details.teams || ''; $('d-brands').value = details.brands || '';

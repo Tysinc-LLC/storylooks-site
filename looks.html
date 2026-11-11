@@ -121,7 +121,7 @@
       else if (item.was) { const pr = el('div', 'item-price'); pr.innerHTML = `<s>${item.was}</s> <span class="sale">${item.price} Sale</span>`; text.appendChild(pr); }
       else text.appendChild(el('div', 'item-price', item.price));
       row.appendChild(text);
-      if (item.look_id && item.n >= 0) row.appendChild(heartButton(t, item.look_id, item.n, true));
+      row.appendChild(heartButton(t, item.look_id, item.look_id ? item.n : -1, true, item.catalog_id));
       const shop = el('a', 'btn small', 'Shop');
       shop.href = item.shop;
       shop.target = '_blank';
