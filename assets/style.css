@@ -175,6 +175,9 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); ou
 
 /* What didn't work, Report a problem, sale prices */
 .miss { margin-top: 12px; display: grid; gap: 8px; justify-items: start; }
+/* "What didn't work?" choices two to a row, so the box takes half the height. */
+.miss .pills { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+.miss .pill { width: 100%; min-width: 0; padding: 8px 10px; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .report { margin-top: 10px; text-align: right; }
 .report > div { display: grid; gap: 8px; margin-top: 8px; text-align: left; }
 .linklike { background: none; border: 0; padding: 0; color: var(--soft); font: 13px var(--sans); text-decoration: underline; cursor: pointer; }
