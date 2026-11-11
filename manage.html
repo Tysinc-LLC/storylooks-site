@@ -29,6 +29,59 @@
       <div class="actions"><button class="btn" id="upload">Add these photos</button></div>
     </div>
 
+    <div class="panel" id="details">
+      <h2>Your details</h2>
+      <p class="muted">Moved, changed sizes or budget, new job? Update anything you told us when you signed up. Your next looks will use it.</p>
+      <div class="actions"><button class="btn ghost" id="d-open">Edit my details</button></div>
+      <form id="dform" class="hidden" novalidate>
+        <div class="row">
+          <div><label for="d-first">First name</label><input id="d-first" type="text" maxlength="40"></div>
+          <div><label for="d-last">Last name</label><input id="d-last" type="text" maxlength="40"></div>
+        </div>
+        <span class="label">Which clothing should we show you?</span>
+        <div class="choice" role="radiogroup">
+          <label><input type="radio" name="d-clothing" value="women's"><span>Women's</span></label>
+          <label><input type="radio" name="d-clothing" value="men's"><span>Men's</span></label>
+        </div>
+        <div class="row">
+          <div><label for="d-age">Age</label><input id="d-age" type="number" inputmode="numeric" min="18" max="110"></div>
+          <div><label for="d-zip">Zip code</label><input id="d-zip" type="text" inputmode="numeric" maxlength="10"></div>
+        </div>
+        <span class="label">Height</span>
+        <div class="pair">
+          <select id="d-ft" aria-label="Feet"></select>
+          <select id="d-in" aria-label="Inches"></select>
+        </div>
+        <div class="row">
+          <div><label for="d-top">Top size</label><select id="d-top"></select></div>
+          <div><label for="d-shoe">Shoe size</label><select id="d-shoe"></select></div>
+        </div>
+        <span class="label" id="d-pants-label">Pants size and length</span>
+        <div class="pair">
+          <select id="d-pants" aria-labelledby="d-pants-label"></select>
+          <select id="d-inseam" aria-label="Length"></select>
+        </div>
+        <div id="d-dress-box"><label for="d-dress">Dress size <span class="muted">(optional)</span></label><select id="d-dress"></select></div>
+        <h3 style="margin:22px 0 6px;">Your style</h3>
+        <div id="d-questions"></div>
+        <h3 style="margin:22px 0 6px;">Your life</h3>
+        <label for="d-job">What do you do for work?</label><input id="d-job" type="text" maxlength="100">
+        <label for="d-interests">Hobbies and interests</label><input id="d-interests" type="text" maxlength="500">
+        <label for="d-teams">Favorite sports teams</label><input id="d-teams" type="text" maxlength="200">
+        <label for="d-brands">Up to 3 favorite clothing brands or stores</label><input id="d-brands" type="text" maxlength="200">
+        <label class="check" style="margin-top:14px;"><input type="checkbox" id="d-haspet"><span>A pet in some of my photos</span></label>
+        <div id="d-petbox" class="hidden">
+          <div class="row">
+            <div><label for="d-petname">Pet's name</label><input id="d-petname" type="text" maxlength="40"></div>
+            <div><label for="d-petkind">What kind?</label><input id="d-petkind" type="text" maxlength="80" placeholder="e.g. blue heeler"></div>
+          </div>
+          <p class="fine">Add pet photos above, under Add photos.</p>
+        </div>
+        <p class="fine">To change your email, write to hello@storylooks.com.</p>
+        <div class="actions"><button class="btn" type="submit" id="d-save">Save my details</button></div>
+      </form>
+    </div>
+
     <div class="panel hidden" id="delivery">
       <h2>How you get your looks</h2>
       <p class="muted" id="delivery-now"></p>
@@ -41,7 +94,7 @@
 
     <div class="panel">
       <h2>Pause or stop</h2>
-      <p class="muted">Pause to take a break (your photos stay saved), or unsubscribe to stop getting StoryLooks.</p>
+      <p class="muted">Pause to take a break (your photos stay saved), or unsubscribe to stop StoryLooks emails. (If you use the app, your looks keep coming there.)</p>
       <div class="actions">
         <button class="btn ghost" data-action="pause" id="pause">Pause</button>
         <button class="btn ghost hidden" data-action="resume" id="resume">Resume my StoryLooks</button>
@@ -94,6 +147,80 @@
     if (r.ok) showDelivery(r.delivery);
   }));
 
+  // Your details: load them when the form is opened, save them with one button.
+  const $ = (id) => document.getElementById(id);
+  const range = (from, to, step = 1) => { const out = []; for (let x = from; x <= to + 1e-9; x += step) out.push(String(x)); return out; };
+  // A saved value that isn't one of today's choices (older sign-ups) is kept as an option, so nothing is lost.
+  const fill = (id, first, list, value) => {
+    const opts = value && !list.includes(value) ? [...list, value] : list;
+    $(id).innerHTML = `<option value="">${first}</option>` + opts.map((x) => `<option value="${x}">${x}</option>`).join('');
+    $(id).value = value || '';
+  };
+  let details = null;
+  function fillSizes(sizes) {
+    const women = document.querySelector('input[name="d-clothing"]:checked')?.value === "women's";
+    fill('d-top', 'Choose', ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'], sizes.top);
+    fill('d-shoe', 'Choose', women ? range(5, 12, 0.5) : range(6, 15, 0.5), sizes.shoe);
+    fill('d-pants', women ? 'Size' : 'Waist', women ? ['00', '0', ...range(2, 24, 2)] : range(28, 44), sizes.pants);
+    fill('d-inseam', 'Length: not sure', women ? ['Short', 'Regular', 'Long'] : range(28, 36, 2), sizes.inseam);
+    fill('d-dress', 'Choose', ['00', '0', ...range(2, 24, 2)], sizes.dress);
+    $('d-dress-box').classList.toggle('hidden', !women);
+  }
+  const currentSizes = () => ({ top: $('d-top').value, shoe: $('d-shoe').value, pants: $('d-pants').value, inseam: $('d-inseam').value, dress: $('d-dress').value });
+  document.querySelectorAll('input[name="d-clothing"]').forEach((r) => r.addEventListener('change', () => fillSizes(currentSizes())));
+  $('d-haspet').addEventListener('change', () => $('d-petbox').classList.toggle('hidden', !$('d-haspet').checked));
+  $('d-open').addEventListener('click', async () => {
+    $('d-open').disabled = true;
+    const r = await postJSON('account', { t, action: 'details' });
+    $('d-open').disabled = false;
+    if (!r.ok) { showMessage(msg, r.message || 'Something went wrong.', false); scrollTo(0, 0); return; }
+    details = r.details;
+    $('d-first').value = details.first_name || ''; $('d-last').value = details.last_name || '';
+    const c = document.querySelector(`input[name="d-clothing"][value="${details.clothing}"]`); if (c) c.checked = true;
+    $('d-age').value = details.age || ''; $('d-zip').value = details.zip || '';
+    fill('d-ft', 'Feet', range(4, 7), details.height_ft); fill('d-in', 'Inches', range(0, 11), details.height_in);
+    fillSizes(details.sizes || {});
+    $('d-job').value = details.occupation || ''; $('d-interests').value = details.interests || '';
+    $('d-teams').value = details.teams || ''; $('d-brands').value = details.brands || '';
+    $('d-haspet').checked = !!details.pet; $('d-petbox').classList.toggle('hidden', !details.pet);
+    $('d-petname').value = details.pet?.name || ''; $('d-petkind').value = details.pet?.kind || '';
+    $('d-questions').innerHTML = '';
+    for (const q of r.questions) {
+      const picked = details.answers[q.id] || [];
+      const choices = [...q.choices, ...picked.filter((p) => p.startsWith('Other: '))];
+      const box = document.createElement('div');
+      box.innerHTML = `<span class="label">${q.text}</span>`;
+      const pills = document.createElement('div'); pills.className = 'pills';
+      for (const o of choices) {
+        const b = document.createElement('button'); b.type = 'button'; b.className = `pill${picked.includes(o) ? ' on' : ''}`; b.textContent = o;
+        b.addEventListener('click', () => {
+          const i = picked.indexOf(o);
+          if (i >= 0) picked.splice(i, 1); else { if (!q.many) picked.length = 0; picked.push(o); }
+          pills.querySelectorAll('.pill').forEach((x) => x.classList.toggle('on', picked.includes(x.textContent)));
+        });
+        pills.append(b);
+      }
+      details.answers[q.id] = picked;
+      box.append(pills); $('d-questions').append(box);
+    }
+    $('d-open').classList.add('hidden'); $('dform').classList.remove('hidden');
+  });
+  $('dform').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    $('d-save').disabled = true;
+    const r = await postJSON('account', { t, action: 'save_details', details: {
+      first_name: $('d-first').value, last_name: $('d-last').value,
+      clothing: document.querySelector('input[name="d-clothing"]:checked')?.value, age: $('d-age').value, zip: $('d-zip').value,
+      height_ft: $('d-ft').value, height_in: $('d-in').value, sizes: currentSizes(), answers: details.answers,
+      occupation: $('d-job').value, interests: $('d-interests').value, teams: $('d-teams').value, brands: $('d-brands').value,
+      pet: $('d-haspet').checked ? { name: $('d-petname').value, kind: $('d-petkind').value } : null,
+    } });
+    $('d-save').disabled = false;
+    showMessage(msg, r.message || 'Something went wrong.', r.ok);
+    scrollTo(0, 0);
+    if (r.ok) { $('dform').classList.add('hidden'); $('d-open').classList.remove('hidden'); if (r.ok && $('d-haspet').checked) $('petchoice').classList.remove('hidden'); }
+  });
+
   async function load() {
     if (!t) { showMessage(msg, 'This link is missing something. Use the link at the bottom of any StoryLooks email.', false); return; }
     const r = await postJSON('account', { t, action: 'info' });
@@ -117,6 +244,7 @@
     scrollTo(0, 0);
     if (r.ok && action === 'delete') page.classList.add('hidden');
     else if (r.ok && r.status) showStatus(r.status);
+    if (r.ok && r.delivery) showDelivery(r.delivery);
   }));
 
   document.getElementById('upload').addEventListener('click', async () => {
