@@ -108,11 +108,74 @@ function heartButton(t, lookId, n, hearted, catalogId) {
   return b;
 }
 
+// "Share this look": the picture with a small band, "STORYLOOKS · made with AI · storylooks.com" (it keeps
+// sharing honest), through the phone's share menu. Computers without one save the picture instead.
+async function shareLook(t, look, btn) {
+  btn.disabled = true;
+  try {
+    const img = await new Promise((ok, bad) => {
+      const i = new Image();
+      i.crossOrigin = 'anonymous';
+      i.onload = () => ok(i);
+      i.onerror = bad;
+      i.src = look.image;
+    });
+    const w = img.naturalWidth, h = img.naturalHeight, band = Math.round(w * 0.09);
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h + band;
+    const g = c.getContext('2d');
+    g.drawImage(img, 0, 0);
+    g.fillStyle = '#2a2420';
+    g.fillRect(0, h, w, band);
+    g.textBaseline = 'middle';
+    const big = `${Math.round(band * 0.34)}px Georgia, serif`, small = `${Math.round(band * 0.24)}px -apple-system, Helvetica, Arial, sans-serif`;
+    const word = 'STORYLOOKS', rest = '   made with AI · storylooks.com';
+    g.font = big; const ww = g.measureText(word).width + band * 0.06 * (word.length - 1);
+    g.font = small; const rw = g.measureText(rest).width;
+    let x = (w - ww - rw) / 2;
+    g.font = big; g.fillStyle = '#ffffff';
+    for (const ch of word) { g.fillText(ch, x, h + band / 2); x += g.measureText(ch).width + band * 0.06; }
+    g.font = small; g.fillStyle = '#e7dfd4';
+    g.fillText(rest, x, h + band / 2);
+    const blob = await new Promise((ok) => c.toBlob(ok, 'image/png'));
+    const file = new File([blob], 'storylooks.png', { type: 'image/png' });
+    let shared = false;
+    if (navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], text: 'Me in StoryLooks. See yourself in it: storylooks.com' });
+        shared = true;
+      } catch (e) {
+        if (e?.name !== 'AbortError') throw e; // they closed the share menu
+      }
+    } else {
+      const a = el('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'storylooks.png';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      shared = true;
+    }
+    if (shared) postJSON('account', { t, action: 'shared', look: look.id }).catch(() => {});
+  } catch {
+    alert("Couldn't share that look. Please try again.");
+  }
+  btn.disabled = false;
+}
+
 // The full look: title, photo, story, items (heart + Shop), and the two quick ratings if asked for.
 function lookCard(t, look, { label, ratings = true } = {}) {
   const card = el('div', 'rate-look');
   if (label) card.appendChild(el('div', 'kicker', label));
-  card.appendChild(el('h3', '', look.title));
+  const head = el('div', 'look-head');
+  head.appendChild(el('h3', '', look.title));
+  if (look.image) {
+    const share = el('button', 'share-btn', 'Share');
+    share.type = 'button';
+    share.setAttribute('aria-label', 'Share this look');
+    share.addEventListener('click', () => shareLook(t, look, share));
+    head.appendChild(share);
+  }
+  card.appendChild(head);
   if (look.image) { const img = el('img'); img.src = look.image; img.alt = look.title; img.loading = 'lazy'; card.appendChild(img); }
   if (look.story) card.appendChild(el('p', 'story', look.story));
   if (look.products?.length) {

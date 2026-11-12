@@ -192,3 +192,10 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); ou
 .photo-tile { margin: 0; display: grid; gap: 4px; justify-items: start; font: 13px var(--sans); }
 .photo-tile img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 10px; background: var(--chip, #f7f2ec); }
 .photo-tile figcaption { font-weight: 600; }
+
+/* Share button next to a look's title */
+.look-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.look-head h3 { margin-right: auto; }
+.share-btn { flex: none; margin-top: 4px; background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font: 600 13px var(--sans); color: var(--ink); cursor: pointer; }
+.share-btn:hover { background: var(--chip); }
+.share-btn:disabled { opacity: .5; }
