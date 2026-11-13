@@ -19,6 +19,9 @@
     <div id="looks"></div>
     <p class="fine" style="margin:6px 0 0;">Products are shown for styling, and StoryLooks may earn a commission when you purchase through these links, at no cost to you. Brands shown aren't affiliated with or endorsing StoryLooks unless we say so.</p>
 
+    <div id="msg" class="hidden" role="status"></div>
+    <p class="fine hidden" id="asked" style="margin:22px 0 0;">Thanks for helping shape next week's looks. We'll ask again next Monday.</p>
+    <div id="ask">
     <h3 style="margin:22px 0 6px;">What's coming up in the next couple of weeks?</h3>
     <div class="choice" style="margin:10px 0 4px;" id="ideas">
       <label><input type="checkbox" value="Work as usual"><span>Work as usual</span></label>
@@ -35,8 +38,8 @@
 
     <div id="questions"></div>
 
-    <div id="msg" class="hidden" role="status"></div>
     <button class="btn" id="send" type="submit" style="width:100%;margin-top:18px;">Send</button>
+    </div>
   </form>
 </div>
 <script src="assets/app.js"></script>
@@ -51,6 +54,7 @@
   const box = document.getElementById('questions');
   const looksBox = document.getElementById('looks');
   let questions = [];
+  let askWeek = true; // the weekly questions are asked once a week; after they're sent, hidden until Monday
 
   function showLooks(looks) {
     looksBox.innerHTML = '';
@@ -62,7 +66,7 @@
       if (look.pending) earlierWaiting = true;
       looksBox.appendChild(wait ? waitingCard(look.upcoming ? look : { ...look, upcoming: false }, label) : lookCard(t, look, { label }));
     });
-    if (looks.length) {
+    if (looks.length && askWeek) {
       const h = el('h2', '', "Help shape next week's looks");
       h.style.margin = '30px 0 0';
       looksBox.appendChild(h);
@@ -88,6 +92,11 @@
   postJSON('account', { t, action: 'info', i: param('i') }).then((r) => {
     if (!r.ok) { showMessage(msg, r.message || 'This link is missing something. Use the link in your latest StoryLooks email.', false); return; }
     const looks = r.looks || [];
+    askWeek = r.ask_week !== false;
+    if (!askWeek) {
+      document.getElementById('ask').classList.add('hidden');
+      document.getElementById('asked').classList.remove('hidden');
+    }
     document.getElementById('hello').textContent = looks.length ? `How did we do, ${r.name}?` : `Help shape next week's looks, ${r.name}`;
     showLooks(looks);
     if (stillMaking(looks) && r.issue) finishTheRest(r.issue.id, looks);
@@ -165,12 +174,15 @@
       // Ratings save as they're tapped, so Send with nothing else filled in is fine too.
       const rated = document.querySelector('.pill.on');
       showMessage(msg, rated ? 'Thanks! Your ratings are saved.' : 'Pick something or type a few words first.', Boolean(rated));
+      msg.scrollIntoView({ block: 'center', behavior: 'smooth' });
       return;
     }
     send.disabled = true;
     const r = await postJSON('account', { t, action: 'week', text, answers, other }).catch(() => ({ ok: false }));
     showMessage(msg, r.message || 'Something went wrong. Please try again.', r.ok);
-    if (r.ok) send.classList.add('hidden'); else send.disabled = false;
+    msg.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    // Sent: the questions are done for this week.
+    if (r.ok) document.getElementById('ask').classList.add('hidden'); else send.disabled = false;
   });
 </script>
 </body>
