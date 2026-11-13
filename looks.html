@@ -45,7 +45,7 @@
   const t = param('t');
   const msg = document.getElementById('msg');
   document.getElementById('back').href = `week.html?t=${encodeURIComponent(t || '')}`;
-  if (!t) showMessage(msg, 'Open this page from a StoryLooks email.', false);
+  if (!t) showMessage(msg, 'Open this page from a StoryLooks email, or sign in at storylooks.com/signin.html.', false);
 
   // ----- tabs (Past looks / Favorites), remembered in the address so the email links can open either one -----
   const loaded = {};

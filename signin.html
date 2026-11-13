@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in · StoryLooks</title>
+<meta name="description" content="Sign in to see your StoryLooks, favorites and settings.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="narrow">
+  <header class="top"><a class="wordmark" href="./">STORYLOOKS</a></header>
+  <h1 style="font-size:34px;">Sign in</h1>
+  <div id="msg" class="hidden" role="status"></div>
+
+  <div class="panel" id="step-email">
+    <p class="muted">No password needed. Enter the email you use for StoryLooks, and we'll send you a 6-digit code.</p>
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="email" required>
+    <div class="actions"><button class="btn" id="send" type="button">Email me a code</button></div>
+  </div>
+
+  <div class="panel hidden" id="step-code">
+    <p class="muted" id="sent-note"></p>
+    <label for="code">6-digit code</label>
+    <input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" style="max-width:160px;">
+    <div class="actions">
+      <button class="btn" id="verify" type="button">Sign in</button>
+      <button class="btn ghost small" id="again" type="button">Use a different email</button>
+    </div>
+  </div>
+
+  <p class="fine center" style="margin-top:24px;">New to StoryLooks? <a href="join.html">Join free</a> · <a href="help.html">Help</a></p>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  const msg = document.getElementById('msg');
+  const emailIn = document.getElementById('email');
+  const codeIn = document.getElementById('code');
+  const stepEmail = document.getElementById('step-email');
+  const stepCode = document.getElementById('step-code');
+
+  async function send() {
+    const email = emailIn.value.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showMessage(msg, 'Please enter a valid email.', false);
+    const btn = document.getElementById('send');
+    btn.disabled = true;
+    const r = await postJSON('app-auth', { action: 'send', email, web: true }).catch(() => ({ ok: false }));
+    btn.disabled = false;
+    if (!r.ok) return showMessage(msg, r.message || 'Something went wrong. Please try again.', false);
+    msg.className = 'hidden';
+    document.getElementById('sent-note').textContent = `If ${email} has StoryLooks, a code is on its way. It works for 10 minutes. Check your spam or promotions folder if you don't see it.`;
+    stepEmail.classList.add('hidden');
+    stepCode.classList.remove('hidden');
+    codeIn.focus();
+  }
+
+  async function verify() {
+    const code = codeIn.value.replace(/\D/g, '');
+    if (code.length !== 6) return showMessage(msg, 'Enter the 6 digits from the email.', false);
+    const btn = document.getElementById('verify');
+    btn.disabled = true;
+    const r = await postJSON('app-auth', { action: 'verify', email: emailIn.value.trim(), code, web: true }).catch(() => ({ ok: false }));
+    btn.disabled = false;
+    if (!r.ok) return showMessage(msg, r.message || 'Something went wrong. Please try again.', false);
+    // The code proved the email, so the photos on the settings page open without a second code (this tab only).
+    try { sessionStorage.setItem('sl_photo_pass', r.pass); } catch { /* private window: they'll get a photo code instead */ }
+    location.href = `week.html?t=${encodeURIComponent(r.token)}`;
+  }
+
+  document.getElementById('send').addEventListener('click', send);
+  emailIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+  document.getElementById('verify').addEventListener('click', verify);
+  codeIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') verify(); });
+  document.getElementById('again').addEventListener('click', () => {
+    stepCode.classList.add('hidden');
+    stepEmail.classList.remove('hidden');
+    msg.className = 'hidden';
+    codeIn.value = '';
+    emailIn.focus();
+  });
+</script>
+</body>
+</html>

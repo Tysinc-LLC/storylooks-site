@@ -14,7 +14,7 @@
   <form class="panel" id="week">
     <h1 style="font-size:34px;" id="hello">How did we do?</h1>
     <p class="muted">About 30 seconds. Answer whatever you like and skip the rest.</p>
-    <p class="looks-links"><a id="past-link" href="#">Past looks</a> · <a id="fav-link" href="#">My favorites</a></p>
+    <p class="looks-links"><a id="past-link" href="#">Past looks</a> · <a id="fav-link" href="#">My favorites</a> · <a id="settings-link" href="#">My settings</a></p>
 
     <div id="looks"></div>
     <p class="fine" style="margin:6px 0 0;">Products are shown for styling, and StoryLooks may earn a commission when you purchase through these links, at no cost to you. Brands shown aren't affiliated with or endorsing StoryLooks unless we say so.</p>
@@ -44,6 +44,7 @@
   const t = param('t');
   document.getElementById('past-link').href = `looks.html?t=${encodeURIComponent(t || '')}#past`;
   document.getElementById('fav-link').href = `looks.html?t=${encodeURIComponent(t || '')}#favorites`;
+  document.getElementById('settings-link').href = `manage.html?t=${encodeURIComponent(t || '')}`;
   const form = document.getElementById('week');
   const msg = document.getElementById('msg');
   const send = document.getElementById('send');

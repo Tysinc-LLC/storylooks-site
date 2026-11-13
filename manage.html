@@ -271,7 +271,9 @@
   }));
 
   // ---------- seeing your photos (after a code from your email) ----------
+  // Signed in on this website a moment ago: the sign-in code already proved the email, so no second code.
   let pass = null;
+  try { pass = sessionStorage.getItem('sl_photo_pass'); } catch { /* no storage: ask for a code */ }
   const codeNote = document.getElementById('code-note');
   document.getElementById('photo-code').addEventListener('click', async (e) => {
     e.target.disabled = true;
@@ -298,6 +300,7 @@
   // The 30-minute pass ran out: ask for a new code.
   function lockPhotos() {
     pass = null;
+    try { sessionStorage.removeItem('sl_photo_pass'); } catch { /* nothing stored */ }
     ['code-ask', 'myphotos-why'].forEach((id) => document.getElementById(id).classList.remove('hidden'));
     document.getElementById('photo-list').classList.add('hidden');
     showMessage(msg, 'For your privacy, photos stay open for 30 minutes. Ask for a new code to see them again.', false);
@@ -387,6 +390,10 @@
   });
 
   load();
+  if (pass && t) {
+    ['code-ask', 'myphotos-why'].forEach((id) => document.getElementById(id).classList.add('hidden'));
+    showPhotos();
+  }
 </script>
 </body>
 </html>
