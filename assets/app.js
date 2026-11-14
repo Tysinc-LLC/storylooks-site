@@ -176,7 +176,14 @@ function lookCard(t, look, { label, ratings = true } = {}) {
     head.appendChild(share);
   }
   card.appendChild(head);
-  if (look.image) { const img = el('img'); img.src = look.image; img.alt = look.title; img.loading = 'lazy'; card.appendChild(img); }
+  if (look.image) {
+    // The small "StoryLooks · AI" tag sits on the corner of every photo, so a screenshot still says where it came
+    // from and that it was made with AI (older photos already have it in the picture itself, ending in -s.jpg).
+    const photo = el('div', 'photo');
+    const img = el('img'); img.src = look.image; img.alt = look.title; img.loading = 'lazy'; photo.appendChild(img);
+    if (!/-s\.jpg/.test(look.image)) photo.appendChild(el('span', 'ai-tag', 'StoryLooks · AI'));
+    card.appendChild(photo);
+  }
   if (look.story) card.appendChild(el('p', 'story', look.story));
   if (look.products?.length) {
     card.appendChild(el('div', 'shop-head', 'Shop this look'));
