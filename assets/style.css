@@ -149,6 +149,7 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); ou
 .rate-look .kicker { margin-bottom: 4px; }
 .rate-look .story { font-family: var(--serif); font-style: italic; font-size: 16px; margin: 12px 0 4px; }
 .shop-head { font: 600 12px/1 var(--sans); letter-spacing: 1.6px; text-transform: uppercase; color: var(--soft); margin: 16px 0 4px; }
+.shop-note { font: 12px/1.4 var(--sans); color: var(--soft); margin: 2px 0 6px; }
 .item, .fav { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
 .item-text { flex: 1; min-width: 0; }
 .item-brand { font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--soft); }

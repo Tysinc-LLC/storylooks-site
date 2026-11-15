@@ -187,6 +187,7 @@ function lookCard(t, look, { label, ratings = true } = {}) {
   if (look.story) card.appendChild(el('p', 'story', look.story));
   if (look.products?.length) {
     card.appendChild(el('div', 'shop-head', 'Shop this look'));
+    card.appendChild(el('div', 'shop-note', 'Shown on you by AI. Check the store for exact color and sizing.'));
     for (const p of look.products) {
       const row = el('div', 'item');
       const text = el('div', 'item-text');
