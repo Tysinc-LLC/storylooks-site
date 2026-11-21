@@ -91,12 +91,10 @@
       <p class="hint">Wear something that shows your build, like jeans and a fitted shirt or sweater, so the AI gets your shape right. Stand naturally with your arms relaxed.</p>
       <label class="drop" id="body"><input type="file" accept="image/*"><span class="drop-text">Tap to add a full-body photo</span></label>
       <div class="thumbs" id="body-thumbs"></div>
-      <span class="label">One more of your face, from a different angle <span class="muted">(recommended)</span></span>
-      <p class="hint">A second face photo helps your looks look like you more than anything else. A slight turn or a big smile is perfect.</p>
-      <label class="drop" id="face2"><input type="file" accept="image/*"><span class="drop-text">Tap to add another face photo</span></label>
+      <span class="label">A selfie, right now</span>
+      <p class="hint">Hold your phone at eye level, arm's length, and look straight at it. No hat or sunglasses. It gives the AI your face as it is today. On a computer without a camera, pick a recent selfie instead.</p>
+      <label class="drop" id="face2"><input type="file" accept="image/*" capture="user"><span class="drop-text">Tap to take a selfie</span></label>
       <div class="thumbs" id="face2-thumbs"></div>
-      <p class="hint" id="face2-skip-row" style="text-align:right;margin-top:6px;"><a href="#" id="face2-skip">Skip for now</a></p>
-      <p class="hint hidden" id="face2-skipped">No problem. You can add more photos anytime from your StoryLooks page.</p>
       <span class="label">More photos of you <span class="muted">(optional, up to 4)</span></span>
       <p class="hint">More photos = more accurate images. Great extras: another full-body shot, a different outfit or setting.</p>
       <label class="drop" id="more"><input type="file" accept="image/*" multiple><span class="drop-text">Tap to add more photos</span></label>
@@ -171,16 +169,8 @@
   const startedAt = Date.now();
   const face = photoPicker('face', { max: 1, label: 'Tap to add a face photo' });
   const body = photoPicker('body', { max: 1, label: 'Tap to add a full-body photo' });
-  const face2 = photoPicker('face2', { max: 1, label: 'Tap to add another face photo' });
+  const face2 = photoPicker('face2', { max: 1, label: 'Tap to take a selfie' }); // required live selfie (owner, 2026-11-21)
   const more = photoPicker('more', { max: 4, label: 'Tap to add more photos' });
-  // The third photo is asked for, not required (owner, 2026-11-21): they can skip it on purpose.
-  let skipFace2 = false;
-  document.getElementById('face2-skip').addEventListener('click', (ev) => {
-    ev.preventDefault();
-    skipFace2 = true;
-    document.getElementById('face2-skip-row').classList.add('hidden');
-    document.getElementById('face2-skipped').classList.remove('hidden');
-  });
   const pets = photoPicker('petphotos', { max: 3, label: 'Tap to add pet photos' });
   const form = document.getElementById('join');
   const msg = document.getElementById('msg');
@@ -216,7 +206,7 @@
     if (n === 3) {
       if (!face().length) return 'Please add a face photo.';
       if (!body().length) return 'Please add a full-body photo.';
-      if (!face2().length && !skipFace2) return 'Add one more face photo (it really helps your looks look like you), or tap "Skip for now".';
+      if (!face2().length) return 'Please take a quick selfie.';
     }
     if (n === 4) {
       if (!interests()) return 'Please tap at least one hobby or type one in.';
