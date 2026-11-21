@@ -99,6 +99,11 @@
     }
     document.getElementById('hello').textContent = looks.length ? `How did we do, ${r.name}?` : `Help shape next week's looks, ${r.name}`;
     showLooks(looks);
+    // Welcome back after being away, or why this week has just one look (the server writes these).
+    // From the "Keep my looks coming" button in an email: opening this page is what keeps them coming.
+    const kept = param('kept') ? ["Thanks! Your looks will keep coming."] : [];
+    const notes = [...kept, ...(param('kept') ? [] : (r.notices || [])), r.issue && r.issue.note].filter(Boolean);
+    if (notes.length) showMessage(msg, notes.join(' '), true);
     if (stillMaking(looks) && r.issue) finishTheRest(r.issue.id, looks);
     questions = r.questions || [];
     for (const q of questions) {
