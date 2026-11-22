@@ -74,7 +74,8 @@
       for (const look of issue.looks.filter((l) => !l.pending && !l.upcoming)) {
         const b = el('button', 'thumb');
         b.type = 'button';
-        if (look.image) { const img = el('img'); img.src = look.image; img.alt = look.title; img.loading = 'lazy'; b.appendChild(img); }
+        // The small grid copy (~50 KB) when there is one; the full picture opens when they tap.
+        if (look.image) { const img = el('img'); img.src = look.thumb || look.image; img.alt = look.title; img.loading = 'lazy'; b.appendChild(img); }
         b.appendChild(el('span', 'thumb-title', look.title));
         b.addEventListener('click', () => openLook(look));
         grid.appendChild(b);
