@@ -1,0 +1,10 @@
+# Members' own pages (they open from private links) are kept out of search results.
+User-agent: *
+Disallow: /week.html
+Disallow: /looks.html
+Disallow: /manage.html
+Disallow: /agree.html
+Disallow: /confirm.html
+Disallow: /thanks.html
+Disallow: /results.html
+Sitemap: https://storylooks.com/sitemap.xml
