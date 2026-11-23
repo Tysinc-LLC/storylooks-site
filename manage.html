@@ -365,7 +365,7 @@
     r.photos.filter((p) => p.kind === 'pet').forEach((p) => pets.append(tile(p, null, remove(p))));
     box.replaceChildren(
       el('p', 'fine', 'Only you can see these. Used for every look:'), main,
-      ...(extras.children.length ? [el('p', 'fine', 'More photos of you (up to 5 are kept):'), extras] : []),
+      ...(extras.children.length ? [el('p', 'fine', 'More photos of you (up to 8 are kept; past that, we keep the clearest ones):'), extras] : []),
       ...(pets.children.length ? [el('p', 'fine', 'Pet photos:'), pets] : []),
     );
     box.classList.remove('hidden');
