@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StoryLooks Premium</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0 6px; }
+  .plan { border: 2px solid var(--line); border-radius: 14px; padding: 18px 16px; background: var(--card); cursor: pointer; text-align: left; font: inherit; color: inherit; }
+  .plan.on { border-color: var(--ink); }
+  .plan .price { font-family: var(--serif); font-size: 26px; margin: 4px 0; }
+  .perks { padding-left: 20px; } .perks li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<div class="narrow">
+  <header class="top"><a class="wordmark" href="./">STORYLOOKS</a></header>
+  <div id="msg" class="hidden" role="status"></div>
+
+  <div id="pitch" class="hidden">
+    <div class="kicker">StoryLooks Premium</div>
+    <h1 style="margin:8px 0 10px;">More looks made just for you</h1>
+    <ul class="perks">
+      <li><strong>5 custom looks every month</strong>, made in minutes: anything you ask for, themes like '90s or Western, vacation looks, remixes and couple pictures.</li>
+      <li><strong>Ask the style chat as much as you like</strong>, with photos of outfits too.</li>
+      <li><strong>Every week's looks, always made</strong>, even when you've been away.</li>
+      <li class="muted">On the way for Premium members: 3 outfits to choose from on each drop day, your own drop time, and back-in-stock and price alerts.</li>
+    </ul>
+    <div class="plans" role="radiogroup" aria-label="Choose a plan">
+      <button class="plan on" type="button" data-plan="monthly" role="radio" aria-checked="true"><div class="kicker" style="color:var(--soft);">Monthly</div><div class="price">$7.99</div><div class="fine">a month</div></button>
+      <button class="plan" type="button" data-plan="yearly" role="radio" aria-checked="false"><div class="kicker">Yearly · save 17%</div><div class="price">$79.99</div><div class="fine">a year (about $6.67 a month)</div></button>
+    </div>
+    <button class="btn" id="subscribe" type="button" style="width:100%;margin-top:10px;">Subscribe</button>
+    <p class="fine" id="terms" style="margin-top:10px;">Renews automatically at $7.99 a month, plus any sales tax, until you cancel. Cancel anytime from Manage subscription; you keep Premium until the end of the period you paid for. By subscribing you agree to our <a href="terms.html">Terms</a>. Payments are handled securely by Stripe.</p>
+  </div>
+
+  <div id="member" class="hidden">
+    <div class="kicker">StoryLooks Premium</div>
+    <h1 style="margin:8px 0 10px;" id="member-title">You have Premium</h1>
+    <p class="muted" id="member-note"></p>
+    <button class="btn ghost" id="manage" type="button">Manage subscription</button>
+    <p class="fine" id="manage-note" style="margin-top:10px;">Change your card, switch between monthly and yearly, or cancel.</p>
+  </div>
+
+  <p class="fine" style="margin-top:28px;">Back to <a id="back" href="./">your StoryLooks</a>. In the app, just switch back; Premium turns on by itself.</p>
+  <footer class="foot"><a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="contact.html">Contact</a> · © 2026 Tysinc LLC (StoryLooks)</footer>
+</div>
+<script src="assets/app.js"></script>
+<script>
+  // The app opens this page with a one-time code (c); the website with their page token (t).
+  const c = param('c'), t = param('t');
+  const who = c ? { c } : { t };
+  const msg = document.getElementById('msg');
+  let plan = 'monthly';
+  if (t) document.getElementById('back').href = `week.html?t=${encodeURIComponent(t)}`;
+  const date = (iso) => new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+  for (const b of document.querySelectorAll('.plan')) {
+    b.addEventListener('click', () => {
+      plan = b.dataset.plan;
+      for (const x of document.querySelectorAll('.plan')) { x.classList.toggle('on', x === b); x.setAttribute('aria-checked', String(x === b)); }
+      document.getElementById('terms').firstChild.textContent = `Renews automatically at ${plan === 'yearly' ? '$79.99 a year' : '$7.99 a month'}, plus any sales tax, until you cancel. Cancel anytime from Manage subscription; you keep Premium until the end of the period you paid for. By subscribing you agree to our `;
+    });
+  }
+
+  async function go(action, extra = {}) {
+    const r = await postJSON('billing', { ...who, action, ...extra }).catch(() => ({ ok: false, message: 'Something went wrong. Please try again.' }));
+    if (r.ok && r.url) location.href = r.url; else showMessage(msg, r.message || 'Something went wrong.', false);
+  }
+  document.getElementById('subscribe').addEventListener('click', (ev) => { ev.target.disabled = true; go('checkout', { plan }).finally(() => { ev.target.disabled = false; }); });
+  document.getElementById('manage').addEventListener('click', () => go('portal'));
+
+  function show(r) {
+    document.getElementById('pitch').classList.toggle('hidden', r.plan.premium);
+    document.getElementById('member').classList.toggle('hidden', !r.plan.premium);
+    if (!r.plan.premium && !r.ready) {
+      document.getElementById('subscribe').disabled = true;
+      document.getElementById('subscribe').textContent = 'Coming very soon';
+    }
+    if (r.plan.premium) {
+      const p = r.plan;
+      document.getElementById('member-title').textContent = `You have Premium, ${r.name}`;
+      document.getElementById('member-note').textContent = p.source === 'comp' ? 'Your Premium is on us. Thank you for helping us build StoryLooks!'
+        : p.canceling ? `Your Premium ends on ${date(p.until)}. You can turn it back on anytime before then.`
+        : p.until ? `Renews on ${date(p.until)}.` : '';
+      document.getElementById('manage').classList.toggle('hidden', p.source !== 'stripe');
+      document.getElementById('manage-note').classList.toggle('hidden', p.source !== 'stripe');
+    }
+  }
+
+  async function load(tries = 0) {
+    const r = await postJSON('billing', { ...who, action: 'status' }).catch(() => ({ ok: false }));
+    if (!r.ok) { showMessage(msg, r.message || 'This link has expired. Open Premium again from the app or your StoryLooks page.', false); return; }
+    // Just back from paying: Stripe tells us within a few seconds, so check again until it shows.
+    if (param('done') && !r.plan.premium && tries < 10) { showMessage(msg, 'Thanks! Turning on your Premium…', true); setTimeout(() => load(tries + 1), 2000); return; }
+    if (param('done') && r.plan.premium) showMessage(msg, 'Welcome to Premium! Everything is turned on.', true);
+    show(r);
+  }
+  if (!c && !t) showMessage(msg, 'Open Premium from the StoryLooks app or your StoryLooks page.', false); else load();
+</script>
+</body>
+</html>

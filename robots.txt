@@ -7,4 +7,5 @@ Disallow: /agree.html
 Disallow: /confirm.html
 Disallow: /thanks.html
 Disallow: /results.html
+Disallow: /premium.html
 Sitemap: https://storylooks.com/sitemap.xml
