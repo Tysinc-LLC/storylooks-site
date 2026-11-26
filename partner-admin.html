@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<title>Partners (owner) · StoryLooks</title>
+<meta name="robots" content="noindex">
+</head>
+<body>
+<div class="narrow">
+  <header class="top"><a class="wordmark" href="./">STORYLOOKS</a></header>
+  <h1>Partners</h1>
+  <p class="fine">Owner only. Open this page with your admin link (the same key as your results page: partner-admin.html?key=...).</p>
+  <div id="msg" class="hidden" role="status"></div>
+  <div id="list"></div>
+</div>
+<script src="assets/app.js"></script>
+<script>
+  const key = param('key') || '', list = document.getElementById('list'), msg = document.getElementById('msg');
+  async function load() {
+    const r = await postJSON('partner', { action: 'admin_list', key });
+    if (!r.ok) { showMessage(msg, r.message || 'Not allowed.', false); return; }
+    list.innerHTML = '';
+    if (!r.partners.length) list.appendChild(el('p', 'muted', 'No applications yet.'));
+    for (const p of r.partners) {
+      const card = el('div', 'card'); card.style.margin = '12px 0';
+      card.appendChild(el('h3', '', `${p.name} · ${p.status}${p.code ? ' · ' + p.code : ''}${p.founding ? ' · founding' : ''}`));
+      card.appendChild(el('p', 'fine', `${p.email} · applied ${new Date(p.created_at).toLocaleDateString()}`));
+      const a = p.application || {};
+      for (const [k, v] of [['Links', a.links], ['Audience', a.audience], ['Why', a.why]]) if (v) card.appendChild(el('p', '', `${k}: ${v}`));
+      if (p.counts) card.appendChild(el('p', 'fine', `${p.counts.visits_total} visits · ${p.counts.signups_total} sign-ups · ${p.counts.active_members} active · ${p.counts.premium_members} Premium`));
+      if (p.dashboard) { const d = el('a', '', 'Their dashboard'); d.href = p.dashboard; card.appendChild(d); }
+      if (p.status !== 'approved') {
+        const code = el('input'); code.placeholder = 'Code (e.g. SARAH)'; code.value = p.code || (p.name || '').split(' ')[0].toUpperCase();
+        const fl = el('label', 'check'); const fc = el('input'); fc.type = 'checkbox'; fc.checked = true; fl.append(fc, ' Founding partner (25%)');
+        const ok = el('button', 'btn small', 'Approve'), no = el('button', 'btn small ghost', 'Decline');
+        ok.onclick = async () => { const x = await postJSON('partner', { action: 'admin_approve', key, id: p.id, code: code.value, founding: fc.checked }); showMessage(msg, x.message, x.ok); if (x.ok) load(); };
+        no.onclick = async () => { const x = await postJSON('partner', { action: 'admin_decline', key, id: p.id }); showMessage(msg, x.message, x.ok); if (x.ok) load(); };
+        card.append(code, fl, ok, ' ', no);
+      }
+      list.appendChild(card);
+    }
+  }
+  load();
+</script>
+</body>
+</html>

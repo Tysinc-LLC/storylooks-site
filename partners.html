@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<title>Partner with StoryLooks</title>
+<meta name="description" content="Creators and influencers: share StoryLooks with your followers and earn 20% of what we receive from the people you bring, for 3 years.">
+</head>
+<body>
+<div class="narrow prose">
+  <header class="top"><a class="wordmark" href="./">STORYLOOKS</a></header>
+  <div class="kicker">Partner program</div>
+  <h1 style="font-size:40px;margin-top:8px;">Share StoryLooks, earn for 3 years</h1>
+  <p class="lead" style="text-align:left;margin:0 0 18px;">StoryLooks shows people real outfits on <em>themselves</em>, planned around their own week. If your followers would love that, let's work together.</p>
+  <h2>How it works</h2>
+  <ul>
+    <li><strong>You get your own link and code</strong> (like storylooks.com/?ref=sarah and SARAH).</li>
+    <li><strong>Your followers get a real offer:</strong> a bonus welcome look when they join, plus 50% off their first 3 months of StoryLooks Premium whenever they want it.</li>
+    <li><strong>You earn 20%</strong> of what StoryLooks receives from the people you bring (Premium subscriptions, and shopping commissions where the store allows sharing them), <strong>for 3 years</strong> from when each person signs up. Our first partners earn <strong>25%</strong> as founding partners.</li>
+    <li><strong>A private dashboard</strong> shows your link visits, sign-ups and members. You see counts and money, never who anyone is.</li>
+    <li><strong>Paid quarterly</strong> once you've earned $50, through Stripe.</li>
+  </ul>
+  <p class="fine">Details are in the <a href="partner-terms.html">partner agreement</a>. We review every application by hand.</p>
+  <h2 id="apply">Apply</h2>
+  <form id="apply-form" class="panel" style="margin-top:8px;">
+    <label for="p-name">Your name (or creator name)</label><input id="p-name" name="name" type="text" maxlength="80" required>
+    <label for="p-email">Email</label><input id="p-email" name="email" type="email" maxlength="120" required autocomplete="email">
+    <label for="p-links">Where you post <span class="muted">(links to your accounts)</span></label><textarea id="p-links" name="links" maxlength="500" placeholder="Instagram, TikTok, YouTube, blog..."></textarea>
+    <label for="p-audience">About how many followers? <span class="muted">(optional)</span></label><input id="p-audience" name="audience" type="text" maxlength="200">
+    <label for="p-why">Why StoryLooks fits your audience <span class="muted">(optional)</span></label><textarea id="p-why" name="why" maxlength="1000"></textarea>
+    <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button class="btn" type="submit" style="width:100%;margin-top:14px;">Apply</button>
+    <div id="msg" class="hidden" role="status"></div>
+  </form>
+  <footer class="foot"><a href="./">Home</a> · <a href="about.html">About</a> · <a href="partner-terms.html">Partner agreement</a> · <a href="privacy.html">Privacy</a> · <a href="contact.html">Contact</a><div style="margin-top:6px;">© 2026 Tysinc LLC (StoryLooks) · 136 S Dubuque Street, Iowa City, IA 52240</div></footer>
+</div>
+<script src="assets/app.js"></script>
+<script>
+  const f = document.getElementById('apply-form'), msg = document.getElementById('msg');
+  f.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const b = f.querySelector('button'); b.disabled = true;
+    const r = await postJSON('partner', { action: 'apply', ...Object.fromEntries(new FormData(f)) });
+    showMessage(msg, r.message || 'Something went wrong.', r.ok);
+    if (r.ok) f.reset(); b.disabled = false;
+  });
+</script>
+</body>
+</html>

@@ -183,6 +183,7 @@ async function shareLook(t, look, btn) {
 // The full look: title, photo, story, items (heart + Shop), and the two quick ratings if asked for.
 function lookCard(t, look, { label, ratings = true } = {}) {
   const card = el('div', 'rate-look');
+  if (look.bonus) label = look.bonus; // the extra welcome look from a partner's code
   if (label) card.appendChild(el('div', 'kicker', label));
   const head = el('div', 'look-head');
   head.appendChild(el('h3', '', look.title));

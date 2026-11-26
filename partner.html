@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<title>Partner dashboard · StoryLooks</title>
+<meta name="robots" content="noindex">
+<style>.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; } .stat .num { font-family: var(--serif); font-size: 34px; }</style>
+</head>
+<body>
+<div class="narrow">
+  <header class="top"><a class="wordmark" href="./">STORYLOOKS</a></header>
+  <div id="msg" class="hidden" role="status"></div>
+  <div id="dash" class="hidden">
+    <div class="kicker">Partner dashboard</div>
+    <h1 id="hello" style="margin:8px 0 12px;"></h1>
+    <div class="card">
+      <div class="fine">Your link</div><p style="margin:4px 0 10px;word-break:break-all;"><strong id="link"></strong> <button class="btn small ghost" id="copy" type="button">Copy</button></p>
+      <div class="fine">Your code</div><p style="margin:4px 0 0;"><strong id="code"></strong></p>
+      <p class="fine" id="offer" style="margin-top:10px;"></p>
+    </div>
+    <div class="stats">
+      <div class="card stat"><div class="num" id="v30">0</div><div class="fine">link visits, last 30 days</div></div>
+      <div class="card stat"><div class="num" id="s30">0</div><div class="fine">sign-ups, last 30 days</div></div>
+      <div class="card stat"><div class="num" id="active">0</div><div class="fine">active members you brought</div></div>
+      <div class="card stat"><div class="num" id="premium">0</div><div class="fine">Premium members you brought</div></div>
+    </div>
+    <p class="fine" id="totals"></p>
+    <div class="note"><strong>Earnings</strong><p class="muted" style="margin:6px 0 0;" id="terms"></p></div>
+    <p class="fine" style="margin-top:16px;">Always disclose the partnership when you post (for example #ad or "I earn from my StoryLooks link"). See the <a href="partner-terms.html">partner agreement</a>. Questions? <a href="mailto:hello@storylooks.com">hello@storylooks.com</a>.</p>
+  </div>
+</div>
+<script src="assets/app.js"></script>
+<script>
+  const msg = document.getElementById('msg');
+  postJSON('partner', { action: 'dashboard', k: param('k') || '' }).then((r) => {
+    if (!r.ok) { showMessage(msg, r.message || 'This dashboard link is not valid.', false); return; }
+    const p = r.partner, c = r.counts, set = (id, v) => { document.getElementById(id).textContent = v; };
+    document.getElementById('dash').classList.remove('hidden');
+    set('hello', `Hi ${p.first_name || p.name}!`); set('link', p.link); set('code', p.code);
+    set('offer', `People who use your link or code get ${p.offer}.`);
+    set('v30', c.visits_30_days); set('s30', c.signups_30_days); set('active', c.active_members); set('premium', c.premium_members);
+    set('totals', `All time: ${c.visits_total} visits, ${c.signups_total} sign-ups.`);
+    set('terms', `You earn ${Math.round(p.rate * 100)}%${p.founding ? ' (founding partner)' : ''} of what StoryLooks receives from the people you bring, for ${Math.round(p.term_months / 12)} years from each sign-up. Your earnings will show here once Premium launches; payouts are quarterly once you reach $50.`);
+    document.getElementById('copy').addEventListener('click', () => navigator.clipboard?.writeText(p.link).then(() => showMessage(msg, 'Link copied.', true)));
+  });
+</script>
+</body>
+</html>
