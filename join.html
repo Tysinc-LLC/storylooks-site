@@ -81,6 +81,14 @@
       <h2>Your photos</h2>
       <p class="muted">These are what the AI uses to make the photos look like you, so they matter more than anything else. Phone photos are perfect.</p>
       <p class="fine">As you add each photo, our AI checks it right away and tells you if a clearer one would help. By adding a photo, you agree to that check; your photos aren't saved unless you finish signing up.</p>
+      <!-- Good and bad examples (owner, 2026-11-25), all of our fictional demo model Jake. -->
+      <div class="tip-strip" aria-label="Photo examples">
+        <figure><img src="assets/img/photo-tips/good.jpg" alt="A clear, well-lit face photo"><figcaption class="ok">✓ Like this</figcaption></figure>
+        <figure><img src="assets/img/photo-tips/bad-sunglasses.jpg" alt="Face hidden by sunglasses and a cap"><figcaption>✗ Sunglasses or hat</figcaption></figure>
+        <figure><img src="assets/img/photo-tips/bad-dark.jpg" alt="A dark, backlit photo"><figcaption>✗ Too dark</figcaption></figure>
+        <figure><img src="assets/img/photo-tips/bad-far.jpg" alt="A far-away group photo"><figcaption>✗ Too far, other people</figcaption></figure>
+      </div>
+      <p class="fine" style="margin:4px 0 10px;">Examples show an AI-made model, not a real person.</p>
       <div class="photo-rules">
         <div class="yes"><strong>Do</strong>
           <ul><li>Just you in the photo</li><li>Good daylight</li><li>Face clear and in focus</li><li>Whole body in the frame for full-body shots</li><li>Everyday clothes that show your shape, like jeans and a fitted top</li></ul>
@@ -104,7 +112,7 @@
       <div class="thumbs" id="face2-thumbs"></div>
       <p class="hint grade" id="face2-grade"></p>
       <span class="label">More photos of you <span class="muted">(optional, up to 4)</span></span>
-      <p class="hint">More photos = more accurate images. Great extras: another full-body shot, a different outfit or setting.</p>
+      <p class="hint">More photos = more accurate images. The best kind: have someone take one with the back camera from 4-6 feet away, in daylight, facing the camera. Another full-body shot helps too.</p>
       <label class="drop" id="more"><input type="file" accept="image/*" multiple><span class="drop-text">Tap to add more photos</span></label>
       <div class="thumbs" id="more-thumbs"></div>
     </div>

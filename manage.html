@@ -333,10 +333,18 @@
       const input = el('input'); input.type = 'file'; input.accept = 'image/*'; input.className = 'hidden';
       input.addEventListener('change', async () => {
         if (!input.files[0]) return;
-        showMessage(msg, 'Uploading…', true); scrollTo(0, 0);
+        // Instant photo check (photo-grade), same as sign-up: a weak face or full-body photo asks before replacing.
+        const small = await shrink(input.files[0]);
+        showMessage(msg, 'Checking your photo…', true); scrollTo(0, 0);
+        const g = new FormData(); g.append('role', role); g.append('photo', small);
+        const graded = await postForm('photo-grade', g).catch(() => ({}));
+        if (graded.ok && graded.retake && !confirm(`This photo could be clearer: ${graded.tip || 'a clearer, brighter photo will make your looks more like you.'}\n\nUse it anyway?`)) {
+          showMessage(msg, 'No change. Pick another photo whenever you like.', true); input.value = ''; return;
+        }
+        showMessage(msg, 'Uploading…', true);
         const data = new FormData();
         data.append('t', t); data.append('pass', pass); data.append('action', 'photos'); data.append('kind', 'person'); data.append('role', role);
-        data.append('photos', await shrink(input.files[0]));
+        data.append('photos', small);
         photoAction(data);
       });
       label.append(input);
@@ -381,10 +389,15 @@
     data.append('t', t);
     data.append('action', 'photos');
     data.append('kind', document.querySelector('input[name=kind]:checked').value);
-    for (const f of files) data.append('photos', await shrink(f));
+    const kind = document.querySelector('input[name=kind]:checked').value;
+    const shrunk = []; for (const f of files) shrunk.push(await shrink(f));
+    for (const f of shrunk) data.append('photos', f);
+    // A quick tip if one of the new photos of them could be better (pets aren't checked).
+    const tips = kind === 'person' ? await Promise.all(shrunk.map((f) => { const g = new FormData(); g.append('role', 'extra'); g.append('photo', f); return postForm('photo-grade', g).catch(() => ({})); })) : [];
+    const weak = tips.find((x) => x.ok && !x.good && x.tip);
     const r = await postForm('account', data);
     btn.disabled = false;
-    showMessage(msg, r.message || 'Something went wrong.', r.ok);
+    showMessage(msg, (r.message || 'Something went wrong.') + (r.ok && weak ? ` Tip: ${weak.tip}` : ''), r.ok);
     scrollTo(0, 0);
     if (r.ok && pass) showPhotos();
   });
