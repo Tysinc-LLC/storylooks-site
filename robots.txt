@@ -9,3 +9,5 @@ Disallow: /thanks.html
 Disallow: /results.html
 Disallow: /premium.html
 Sitemap: https://storylooks.com/sitemap.xml
+Disallow: /partner.html
+Disallow: /partner-admin.html

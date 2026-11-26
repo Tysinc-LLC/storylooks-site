@@ -2,6 +2,24 @@
 const API = 'https://bppaqhrssszivsecrlse.supabase.co/functions/v1';
 const param = (k) => new URLSearchParams(location.search).get(k);
 
+// Partner links (storylooks.com/?ref=sarah): remember the code for 30 days so the sign-up form can fill it in, and count
+// the visit once per browser session (no personal data). A code typed on the form wins over a link.
+const REF_DAYS = 30;
+function partnerRef() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('sl_ref') || 'null');
+    return saved && Date.now() - saved.at < REF_DAYS * 864e5 ? saved : null;
+  } catch { return null; }
+}
+(function catchRef() {
+  const ref = (param('ref') || '').trim();
+  if (!/^[A-Za-z0-9]{3,20}$/.test(ref)) return;
+  const code = ref.toUpperCase();
+  try { localStorage.setItem('sl_ref', JSON.stringify({ code, at: Date.now() })); } catch { /* private mode: the form box still works */ }
+  try { if (sessionStorage.getItem('sl_ref_seen') === code) return; sessionStorage.setItem('sl_ref_seen', code); } catch { /* ignore */ }
+  fetch(`${API}/partner`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'visit', code }) }).catch(() => {});
+})();
+
 // Shrink a photo on the person's own phone before uploading: longest side 1600 px, JPEG.
 // Fast uploads, and well under the server's size limits. If the browser can't read the
 // photo (e.g. an iPhone HEIC on some computers), the original is sent instead.

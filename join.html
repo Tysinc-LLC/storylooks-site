@@ -48,6 +48,9 @@
         <div><label for="zip">Zip code</label><input id="zip" name="zip" type="text" inputmode="numeric" maxlength="10" autocomplete="postal-code" required></div>
       </div>
       <p class="hint" style="margin-top:6px;">Your zip gives us your local weather and seasons.</p>
+      <label for="code">Have a code? <span class="muted">(optional)</span></label>
+      <input id="code" name="code" type="text" maxlength="20" autocapitalize="characters" autocomplete="off" placeholder="e.g. from a creator you follow">
+      <p class="hint" id="code-note" style="margin-top:6px;"></p>
     </div>
 
     <div class="panel step hidden" data-step="2">
@@ -167,6 +170,18 @@
 <script src="assets/app.js"></script>
 <script>
   const startedAt = Date.now();
+  // A partner's code: filled in from their link (?ref=), or typed. We show the offer once it checks out.
+  const codeBox = document.getElementById('code'), codeNote = document.getElementById('code-note');
+  async function checkCode() {
+    const code = codeBox.value.trim();
+    if (!code) { codeNote.textContent = ''; return; }
+    const r = await postJSON('partner', { action: 'check', code }).catch(() => ({ ok: false }));
+    codeNote.textContent = r.ok ? `Code ${r.code} from ${r.name}: you'll get ${r.offer}.` : (r.message || '');
+    codeNote.style.color = r.ok ? 'var(--good)' : 'var(--bad)';
+  }
+  const ref = partnerRef();
+  if (ref && !codeBox.value) { codeBox.value = ref.code; checkCode(); }
+  codeBox.addEventListener('change', checkCode);
   const face = photoPicker('face', { max: 1, label: 'Tap to add a face photo' });
   const body = photoPicker('body', { max: 1, label: 'Tap to add a full-body photo' });
   const face2 = photoPicker('face2', { max: 1, label: 'Tap to take a selfie' }); // required live selfie (owner, 2026-11-21)
@@ -267,7 +282,7 @@
     submit.disabled = true;
     showMessage(msg, 'Getting your photos ready…', true);
     const data = new FormData();
-    for (const n of ['name', 'last_name', 'email', 'clothing', 'age', 'zip', 'height_ft', 'height_in', 'occupation', 'top', 'pants', 'inseam', 'shoe', 'dress', 'brands', 'teams', 'has_pet', 'pet_name', 'pet_kind', 'website']) {
+    for (const n of ['name', 'last_name', 'email', 'clothing', 'age', 'zip', 'height_ft', 'height_in', 'occupation', 'top', 'pants', 'inseam', 'shoe', 'dress', 'brands', 'teams', 'has_pet', 'pet_name', 'pet_kind', 'website', 'code']) {
       data.append(n, form.elements[n]?.value ?? '');
     }
     data.append('interests', interests());
